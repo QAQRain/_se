@@ -1,0 +1,36 @@
+# Python 暫存檔
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 虛擬環境
+.venv/
+venv/
+env/
+ENV/
+
+# 套件與建置產物
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# IDE / 編輯器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 作業系統
+.DS_Store
+Thumbs.db
+
+# 測試產物
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# 輸出檔案
+*.log
+*.html
