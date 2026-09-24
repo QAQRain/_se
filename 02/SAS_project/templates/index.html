@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>校務行政系統</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-[#0d1117] text-gray-200">
+
+<div id="loginScreen" class="hidden min-h-screen flex items-center justify-center p-4"></div>
+
+<div id="app" class="hidden min-h-screen">
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-60 bg-[#161b22] border-r border-[#30363d] z-40 flex flex-col"></aside>
+  <div class="ml-60 flex flex-col min-h-screen">
+    <header id="topbar" class="bg-[#161b22] border-b border-[#30363d] px-6 py-3 flex items-center justify-between sticky top-0 z-30"></header>
+    <main id="content" class="flex-1 p-6 max-w-[1200px] w-full mx-auto"></main>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toast" class="fixed top-4 right-4 z-50 hidden"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
