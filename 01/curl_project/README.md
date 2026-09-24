@@ -144,3 +144,4 @@ curl_project/
 ---
 
 專案為課程專題「製作類似 curl 的命令列工具」，以 Python 實作，透過 CLI 參數涵蓋 HTTP 請求的常用操作。
+使用Opencode製作
