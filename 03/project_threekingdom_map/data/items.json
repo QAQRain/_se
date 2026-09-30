@@ -1,0 +1,587 @@
+{
+  "items": [
+    {
+      "id": "danyangbing",
+      "name": "丹陽兵",
+      "image": "assets/soldier/3_danyangbing.png",
+      "materials": {
+        "皮": 83,
+        "鐵": 83
+      },
+      "tier": 3,
+      "population": [
+        "xiangyong"
+      ],
+      "unlock": "系統給予"
+    },
+    {
+      "id": "yuanrongnubing",
+      "name": "元戎弩兵",
+      "image": "assets/soldier/4_yuanrongnubing.png",
+      "materials": {
+        "皮": 142,
+        "鐵": 142,
+        "韌皮": 10,
+        "精鐵": 10
+      },
+      "tier": 4,
+      "population": [
+        "shuzhongjingzhuang"
+      ],
+      "unlock": "持有\"黃忠\"、\"夏侯淵\""
+    },
+    {
+      "id": "xiandengsishi",
+      "name": "先登死士",
+      "image": "assets/soldier/4.5_xiandengsishi.png",
+      "materials": {
+        "皮": 142,
+        "鐵": 142,
+        "韌皮": 10,
+        "精鐵": 10
+      },
+      "tier": 4.5,
+      "population": [
+        "hebeizhuangshi"
+      ],
+      "unlock": "\"關羽\"20%、\"顏良\"20%"
+    },
+    {
+      "id": "jizhoudajishi",
+      "name": "冀州大戟士",
+      "image": "assets/soldier/4_jizhoudajishi.png",
+      "materials": {
+        "皮": 107,
+        "鐵": 107,
+        "韌皮": 7,
+        "精鐵": 7
+      },
+      "tier": 4,
+      "population": [
+        "hebeizhuangshi"
+      ],
+      "unlock": "\"顏良\"60%"
+    },
+    {
+      "id": "dahanyulinjun",
+      "name": "大漢羽林軍",
+      "image": "assets/soldier/5_dahanyulinjun.png",
+      "materials": {
+        "皮": 416,
+        "鐵": 416,
+        "韌皮": 30,
+        "精鐵": 30
+      },
+      "tier": 5,
+      "population": [
+        "jiangdongyiyong"
+      ],
+      "unlock": "\"劉備\"60%、\"孫尚香\"40%"
+    },
+    {
+      "id": "bingzhouchiji",
+      "name": "并州赤騎",
+      "image": "assets/soldier/5_bingzhouchiji.png",
+      "materials": {
+        "皮": 555,
+        "鐵": 555,
+        "韌皮": 41,
+        "精鐵": 41
+      },
+      "tier": 5,
+      "population": [
+        "hebeizhuangshi"
+      ],
+      "horse": [
+        "liangma"
+      ],
+      "unlock": "\"呂布\"20%、\"劉備\"20%"
+    },
+    {
+      "id": "elaiying",
+      "name": "惡來營",
+      "image": "assets/soldier/4.5_elaiying.png",
+      "materials": {
+        "皮": 333,
+        "鐵": 333,
+        "韌皮": 24,
+        "精鐵": 24
+      },
+      "tier": 4.5,
+      "population": [
+        "zhongyuanzhuangding"
+      ],
+      "unlock": "\"典韋\"80%"
+    },
+    {
+      "id": "fanchengtiewei",
+      "name": "樊城鐵衛",
+      "image": "assets/soldier/3_fanchengtiewei.png",
+      "materials": {
+        "皮": 55,
+        "鐵": 55
+      },
+      "tier": 3,
+      "population": [
+        "jiangdongyiyong"
+      ],
+      "unlock": "持有\"關羽\""
+    },
+    {
+      "id": "hengjiangsheshi",
+      "name": "橫江射士",
+      "image": "assets/soldier/3_hengjiangsheshi.png",
+      "materials": {
+        "皮": 71,
+        "鐵": 71
+      },
+      "tier": 3,
+      "population": [
+        "jiangdongyiyong"
+      ],
+      "unlock": "\"孫堅\"60%"
+    },
+    {
+      "id": "jiangdongfeishuo",
+      "name": "江東飛槊",
+      "image": "assets/soldier/3_jiangdongfeishuo.png",
+      "materials": {
+        "皮": 71,
+        "鐵": 71
+      },
+      "tier": 3,
+      "population": [
+        "jiangdongyiyong"
+      ],
+      "unlock": "持有\"孫策\""
+    },
+    {
+      "id": "heshuoqiangnuwei",
+      "name": "河朔強弩衛",
+      "image": "assets/soldier/5_heshuoqiangnuwei.png",
+      "materials": {
+        "皮": 454,
+        "鐵": 454,
+        "韌皮": 33,
+        "精鐵": 33
+      },
+      "tier": 5,
+      "population": [
+        "hebeizhuangshi"
+      ],
+      "unlock": ""
+    },
+    {
+      "id": "bohaiqiangwei",
+      "name": "渤海槍衛",
+      "image": "assets/soldier/3_bohaiqiangwei.png",
+      "materials": {
+        "皮": 71,
+        "鐵": 71
+      },
+      "tier": 3,
+      "population": [
+        "qingxuyishi"
+      ],
+      "unlock": "持有\"甄姬\""
+    },
+    {
+      "id": "wuhuanlangqi",
+      "name": "烏桓狼騎",
+      "image": "assets/soldier/3_wuhuanlangqi.png",
+      "materials": {
+        "皮": 93,
+        "鐵": 93
+      },
+      "tier": 3,
+      "population": [
+        "biandixiaoyong"
+      ],
+      "horse": [
+        "junma"
+      ],
+      "unlock": "造訪\"南皮\"的\"東平石山\""
+    },
+    {
+      "id": "wudangfeijun",
+      "name": "無當飛軍",
+      "image": "assets/soldier/4.5_wudangfeijun.png",
+      "materials": {
+        "皮": 187,
+        "鐵": 187,
+        "韌皮": 13,
+        "精鐵": 13
+      },
+      "tier": 4.5,
+      "population": [
+        "shuzhongjingzhuang"
+      ],
+      "horse": [
+        "junma"
+      ],
+      "unlock": "\"魏延\"60%"
+    },
+    {
+      "id": "baierbing",
+      "name": "白毦兵",
+      "image": "assets/soldier/5_baierbing.png",
+      "materials": {
+        "皮": 312,
+        "鐵": 312,
+        "韌皮": 23,
+        "精鐵": 23
+      },
+      "tier": 5,
+      "population": [
+        "shuzhongjingzhuang"
+      ],
+      "unlock": "\"劉備\"40%、持有\"曹操\""
+    },
+    {
+      "id": "baimayicong",
+      "name": "白馬義從",
+      "image": "assets/soldier/5_baimayicong.png",
+      "materials": {
+        "皮": 555,
+        "鐵": 555,
+        "韌皮": 41,
+        "精鐵": 41
+      },
+      "tier": 5,
+      "population": [
+        "hebeizhuangshi"
+      ],
+      "horse": [
+        "liangma"
+      ],
+      "unlock": "\"趙雲\"40%、\"劉備\"40%"
+    },
+    {
+      "id": "tengjiabing",
+      "name": "藤甲兵",
+      "image": "assets/soldier/3.5_tengjiabing.png",
+      "materials": {
+        "皮": 62,
+        "鐵": 62
+      },
+      "tier": 3.5,
+      "population": [
+        "shuzhongjingzhuang"
+      ],
+      "unlock": "英雄志-志在四方完成度6獎勵"
+    },
+    {
+      "id": "huweijun",
+      "name": "虎衛軍",
+      "image": "assets/soldier/4_huweijun.png",
+      "materials": {
+        "皮": 142,
+        "鐵": 142,
+        "韌皮": 10,
+        "精鐵": 10
+      },
+      "tier": 4,
+      "population": [
+        "zhongyuanzhuangding"
+      ],
+      "unlock": "\"典韋\"20%、持有\"曹操\""
+    },
+    {
+      "id": "hubaoji",
+      "name": "虎豹騎",
+      "image": "assets/soldier/5_hubaoji.png",
+      "materials": {
+        "皮": 500,
+        "鐵": 500,
+        "韌皮": 37,
+        "精鐵": 37
+      },
+      "tier": 5,
+      "population": [
+        "zhongyuanzhuangding"
+      ],
+      "horse": [
+        "liangma"
+      ],
+      "unlock": "\"曹操\"40%、\"典韋\"40%、\"夏侯淵\"40%"
+    },
+    {
+      "id": "xiliangtieqi",
+      "name": "西涼鐵騎",
+      "image": "assets/soldier/4_xiliangtieqi.png",
+      "materials": {
+        "皮": 222,
+        "鐵": 222,
+        "韌皮": 16,
+        "精鐵": 16
+      },
+      "tier": 4,
+      "population": [
+        "biandixiaoyong"
+      ],
+      "horse": [
+        "junma"
+      ],
+      "unlock": "英雄志-破關斬將完成度6獎勵"
+    },
+    {
+      "id": "jiefanbing",
+      "name": "解煩兵",
+      "image": "assets/soldier/5_jiefanbing.png",
+      "materials": {
+        "皮": 374,
+        "鐵": 374,
+        "韌皮": 29,
+        "精鐵": 29
+      },
+      "tier": 5,
+      "population": [
+        "jiangdongyiyong"
+      ],
+      "unlock": "\"孫策\"80%"
+    },
+    {
+      "id": "jiefanhuobu",
+      "name": "解煩火部",
+      "image": "assets/soldier/4.5_jiefanhuobu.png",
+      "materials": {
+        "皮": 250,
+        "鐵": 250,
+        "韌皮": 18,
+        "精鐵": 18
+      },
+      "tier": 4.5,
+      "population": [
+        "jiangdongyiyong"
+      ],
+      "unlock": "\"孫策\"40%"
+    },
+    {
+      "id": "qiaoruiwei",
+      "name": "譙銳衛",
+      "image": "assets/soldier/4_qiaoruiwei.png",
+      "materials": {
+        "皮": 100,
+        "鐵": 100,
+        "韌皮": 7,
+        "精鐵": 7
+      },
+      "tier": 4,
+      "population": [
+        "zhongyuanzhuangding"
+      ],
+      "unlock": "持有\"曹操\"、\"呂布\""
+    },
+    {
+      "id": "meiwuhuogongshou",
+      "name": "郿塢火弓手",
+      "image": "assets/soldier/4_meiwuhuogongshou.png",
+      "materials": {
+        "皮": 166,
+        "鐵": 166,
+        "韌皮": 12,
+        "精鐵": 12
+      },
+      "tier": 4,
+      "population": [
+        "biandixiaoyong"
+      ],
+      "unlock": "新手簽到第二天"
+    },
+    {
+      "id": "xianzhenying",
+      "name": "陷陣營",
+      "image": "assets/soldier/5_xianzhenying.png",
+      "materials": {
+        "皮": 357,
+        "鐵": 357,
+        "韌皮": 26,
+        "精鐵": 26
+      },
+      "tier": 5,
+      "population": [
+        "qingxuyishi"
+      ],
+      "unlock": "\"呂布\"40%、\"呂玲綺\"60%"
+    },
+    {
+      "id": "yongliangfeixiongjun",
+      "name": "雍涼飛熊軍",
+      "image": "assets/soldier/5_yongliangfeixiongjun.png",
+      "materials": {
+        "皮": 555,
+        "鐵": 555,
+        "韌皮": 41,
+        "精鐵": 41
+      },
+      "tier": 5,
+      "population": [
+        "biandixiaoyong"
+      ],
+      "unlock": "英雄志-風雲際會完成度6獎勵"
+    },
+    {
+      "id": "qingzhoubing",
+      "name": "青州兵",
+      "image": "assets/soldier/3.5_qingzhoubing.png",
+      "materials": {
+        "皮": 71,
+        "鐵": 71
+      },
+      "tier": 3.5,
+      "population": [
+        "qingxuyishi"
+      ],
+      "unlock": "持有\"曹操\""
+    },
+    {
+      "id": "qinglongwei",
+      "name": "青龍衛",
+      "image": "assets/soldier/5_qinglongwei.png",
+      "materials": {
+        "皮": 1071,
+        "鐵": 1071,
+        "韌皮": 79,
+        "精鐵": 79
+      },
+      "tier": 5,
+      "population": [
+        "zhongyuanzhuangding"
+      ],
+      "unlock": "\"關羽\"60%"
+    },
+    {
+      "id": "jinghanjun",
+      "name": "靖漢軍",
+      "image": "assets/soldier/5_jinghanjun.png",
+      "materials": {
+        "皮": 357,
+        "鐵": 357,
+        "韌皮": 26,
+        "精鐵": 26
+      },
+      "tier": 5,
+      "population": [
+        "shuzhongjingzhuang"
+      ],
+      "unlock": "\"關羽\"40%"
+    },
+    {
+      "id": "weiwuruishi",
+      "name": "魏武銳士",
+      "image": "assets/soldier/5_weiwuruishi.png",
+      "materials": {
+        "皮": 333,
+        "鐵": 333,
+        "韌皮": 24,
+        "精鐵": 24
+      },
+      "tier": 5,
+      "population": [
+        "zhongyuanzhuangding"
+      ],
+      "unlock": "\"曹操\"40%、持有\"甄姬\""
+    },
+    {
+      "id": "huangjinfushuituan",
+      "name": "黃巾浮水團",
+      "image": "assets/soldier/3.5_huangjinfushuituan.png",
+      "materials": {
+        "皮": 71,
+        "鐵": 71
+      },
+      "tier": 3.5,
+      "population": [
+        "xiangyong"
+      ],
+      "unlock": "持有\"張角\""
+    },
+    {
+      "id": "daopaishou",
+      "name": "刀牌手",
+      "image": "assets/soldier/2_daopaishou.png",
+      "materials": {},
+      "craftable": false,
+      "tier": 2,
+      "population": [
+        "xiangyong"
+      ],
+      "unlock": "系統給予"
+    },
+    {
+      "id": "gongjiangtuan",
+      "name": "工匠團",
+      "image": "assets/soldier/2_gongjiangtuan.png",
+      "materials": {},
+      "craftable": false,
+      "tier": 2,
+      "population": [
+        "xiangyong"
+      ],
+      "unlock": "新手簽到第四天"
+    },
+    {
+      "id": "gongjianwei",
+      "name": "弓箭衛",
+      "image": "assets/soldier/1_gongjianwei.png",
+      "materials": {},
+      "craftable": false,
+      "tier": 1,
+      "population": [
+        "xiangyong"
+      ],
+      "unlock": "系統給予"
+    },
+    {
+      "id": "nuwei",
+      "name": "弩衛",
+      "image": "assets/soldier/2_nuwei.png",
+      "materials": {},
+      "craftable": false,
+      "tier": 2,
+      "population": [
+        "xiangyong"
+      ],
+      "unlock": "系統給予"
+    },
+    {
+      "id": "caiyaodui",
+      "name": "採藥隊",
+      "image": "assets/soldier/2_caiyaodui.png",
+      "materials": {},
+      "craftable": false,
+      "tier": 2,
+      "population": [
+        "xiangyong"
+      ],
+      "unlock": "官方充值回饋禮560金錠第一天給予"
+    },
+    {
+      "id": "tuqiying",
+      "name": "突騎營",
+      "image": "assets/soldier/2.5_tuqiying.png",
+      "materials": {},
+      "craftable": false,
+      "tier": 2.5,
+      "population": [
+        "xiangyong"
+      ],
+      "horse": [
+        "junma"
+      ],
+      "unlock": "系統給予"
+    },
+    {
+      "id": "changqiangying",
+      "name": "長槍營",
+      "image": "assets/soldier/1_changqiangying.png",
+      "materials": {},
+      "craftable": false,
+      "tier": 1,
+      "population": [
+        "xiangyong"
+      ],
+      "unlock": "系統給予"
+    }
+  ]
+}

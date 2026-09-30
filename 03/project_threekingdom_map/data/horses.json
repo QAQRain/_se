@@ -1,0 +1,14 @@
+{
+  "horses": [
+    {
+      "id": "liangma",
+      "name": "良馬",
+      "image": "assets/resources/liangma.png"
+    },
+    {
+      "id": "junma",
+      "name": "軍馬",
+      "image": "assets/resources/junma.png"
+    }
+  ]
+}

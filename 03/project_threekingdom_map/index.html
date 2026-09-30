@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>三國地圖 · 兵裝據點</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>三國兵裝據點地圖 <span class="update-date">20260816.1</span></h1>
+    <div class="mode-switch" id="modeSwitch">
+      <button class="mode-btn active" data-mode="craft">兵裝</button>
+      <button class="mode-btn" data-mode="resource">資源點</button>
+    </div>
+    <div class="header-status" id="status"></div>
+    <button id="resetBtn" class="reset-btn" title="重設：清除選取／高亮／已採標記">重設</button>
+  </header>
+
+  <main class="layout">
+    <section class="map-panel">
+      <div class="map-viewport" id="mapViewport">
+        <div class="map-wrap" id="mapWrap">
+          <img id="mapImg" src="assets/map.png" alt="三國地圖">
+          <div id="resourcesLayer"></div>
+          <div id="markersLayer"></div>
+        </div>
+      </div>
+      <div class="res-control" id="resControl">
+        <div class="res-control-title">資源類型（點擊切換顯示）</div>
+        <div class="res-control-btns" id="resTypeBtns"></div>
+        <div class="res-control-title res-level-title">資源等級（驛站／關口常駐顯示）</div>
+        <div class="res-level-btns" id="resLevelBtns"></div>
+      </div>
+      <div class="zoom-controls">
+        <button id="zoomOutBtn" title="縮小">−</button>
+        <button id="zoomResetBtn" title="重置縮放">100%</button>
+        <button id="zoomInBtn" title="放大">＋</button>
+      </div>
+      <div id="detailPanel" class="detail-panel">
+        <div class="dp-head">
+          <span class="dp-name" id="dpName">尚未選取據點</span>
+          <button id="dpClose" class="dp-close" title="關閉">✕</button>
+        </div>
+        <div class="dp-body" id="dpItems"></div>
+        <div class="dp-section dp-qty">
+          <span class="dp-label">數量</span>
+          <input type="number" id="qtyInput" class="dp-input" value="1" min="1" step="1" title="以數量計算所需資源">
+        </div>
+        <div class="dp-section">
+          <span class="dp-label">合計所需</span>
+          <div id="dpTotals" class="materials"></div>
+        </div>
+        <div class="dp-section">
+          <div class="dp-res-head">
+            <span class="dp-label">我的資源</span>
+            <label class="dp-switch" title="開啟後，資源不足時顯示紅字警示">
+              <input type="checkbox" id="resToggle">
+              <span class="dp-switch-track"></span>
+              <span class="dp-switch-text">顯示不足警示</span>
+            </label>
+          </div>
+          <div class="dp-res-grid">
+            <label class="dp-res-field"><img class="res-icon" src="assets/resources/pi.png" alt="皮">皮<input type="number" id="resPi" class="dp-input" min="0" step="1" value="0"></label>
+            <label class="dp-res-field"><img class="res-icon" src="assets/resources/tie.png" alt="鐵">鐵<input type="number" id="resTie" class="dp-input" min="0" step="1" value="0"></label>
+            <label class="dp-res-field"><img class="res-icon" src="assets/resources/renpi.png" alt="韌皮">韌皮<input type="number" id="resRen" class="dp-input" min="0" step="1" value="0"></label>
+            <label class="dp-res-field"><img class="res-icon" src="assets/resources/jingtie.png" alt="精鐵">精鐵<input type="number" id="resJing" class="dp-input" min="0" step="1" value="0"></label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h2>兵裝清單</h2>
+        <p class="hint">點擊兵裝 → 高亮可造據點並顯示所需人口/馬<br>點擊人口 → 高亮擁有該人口的據點<br>點擊馬 → 高亮使用該馬的兵團<br>點擊據點 → 查看該處可造兵裝與材料<br>點擊兵團 → 顯示解鎖方式</p>
+      </div>
+      <div class="sidebar-body">
+        <div class="pop-col">
+          <div class="pop-list" id="popList"></div>
+          <div class="horse-list" id="horseList"></div>
+        </div>
+        <ul id="itemList"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

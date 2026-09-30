@@ -1,0 +1,27 @@
+# 憑證／權杖（絕對不能上傳）
+.git-credentials
+.github_token
+*.token
+.env
+.env.*
+
+# 內部開發筆記（不公開）
+AGENTS.md
+CLAUDE.md
+.opencode/
+
+# 地圖原始素材與截圖（僅本機留存；new.png 為 coord-picker 工具所需）
+assets/map/*
+!assets/map/new.png
+
+# 工具產出的暫存檔
+map-stitched.png
+resource-points.json
+
+# 作業系統／編輯器
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+.idea/
+.vscode/
