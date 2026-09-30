@@ -9,7 +9,7 @@
 | | 網址 |
 | --- | --- |
 | **原版（主要版本，內容以此為準）** | https://rainchenblue.github.io/threekingdom_map/ |
-| 本副本 | https://\<帳號\>.github.io/\<repo名\>/ |
+| 本副本 | https://github.com/QAQRain/_se/tree/main/03/project_threekingdom_map/ |
 
 - 本副本的程式、資料與圖片**完全來自原版**，沒有任何修改或新增功能。
 - **日後的更新以原版為準**：有新功能或資料修正時，先到原版確認，再視需要同步到本副本。
@@ -21,9 +21,7 @@
 打開以下網址即可使用，不需安裝任何東西：
 
 > 原版：https://rainchenblue.github.io/threekingdom_map/
-> 本副本：https://\<帳號\>.github.io/\<repo名\>/
-
-（將 `\<帳號\>` / `\<repo名\>` 換成本 repo 的實際值。）
+> 本副本：https://github.com/QAQRain/_se/tree/main/03/project_threekingdom_map/
 
 ## 功能一覽
 
