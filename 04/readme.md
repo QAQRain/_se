@@ -5,6 +5,7 @@
 
 # 步驟說明
 
+## 新組織步驟
 新增 新組織(qaqrain-ex) 及 專案(git_ex)  
 ssh至本機(後須說明省略)  
 
@@ -16,6 +17,8 @@ ssh至本機(後須說明省略)
 
 切換分支  
 
+## 新組織分支步驟
+
 新增testversion.md  
 >git push origin testversion  
 
@@ -25,6 +28,8 @@ ssh至本機(後須說明省略)
 
 檔案切換至main分支，tesetversion.md消失  
 
+## 新組織步驟
+
 >git merge testversion  
 
 合併testversion至main，testversion.md出現  
@@ -32,6 +37,8 @@ ssh至本機(後須說明省略)
 >git push origin main  
 
 上傳main分支  
+
+## 子專案步驟
 
 在網站Fork給原組織  
 本機新增qaqrainfork.md檔案並上傳  
