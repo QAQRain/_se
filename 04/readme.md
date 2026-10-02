@@ -9,22 +9,28 @@
 ssh至本機(後須說明省略)  
 
 >git check -b testversion  
+
 新增”testversion”分支  
 
 >git branch   
+
 切換分支  
 
 新增testversion.md  
 >git push origin testversion  
+
 上傳到testversion分支  
 
 >git checkout main  
+
 檔案切換至main分支，tesetversion.md消失  
 
 >git merge testversion  
+
 合併testversion至main，testversion.md出現  
 
 >git push origin main  
+
 上傳main分支  
 
 在網站Fork給原組織  
