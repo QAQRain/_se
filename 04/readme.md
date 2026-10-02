@@ -9,6 +9,7 @@
 ssh至本機(後須說明省略)  
 git check -b testversion  
 >新增”testversion”分支  
+
 git branch   
 >切換分支  
 
