@@ -44,5 +44,7 @@ ssh至本機(後須說明省略)
 本機新增qaqrainfork.md檔案並上傳  
 發送合併原組織專案請求  
 
+# 補充說明
+
 圖文筆記:  
 [點此](https://docs.google.com/document/d/1rNGNbHGCApQ86_E0SypaQNthMb6mGe4oKR8Gd8wm0Bg/edit?usp=sharing)
