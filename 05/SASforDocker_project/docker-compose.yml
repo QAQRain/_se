@@ -1,0 +1,107 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: sas
+      POSTGRES_PASSWORD: saspass
+      POSTGRES_DB: sasdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    networks:
+      - sasnet
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      FLASK_ENV: production
+      SAS_SECRET_KEY: sas-prod-secret-key-change-me
+      DATABASE_URL: postgresql://sas:saspass@postgres:5432/sasdb
+    depends_on:
+      - postgres
+    expose:
+      - "5000"
+    restart: unless-stopped
+    networks:
+      - sasnet
+
+  api-node:
+    build:
+      context: ./services/api-node
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: postgres
+      DB_USER: sas
+      DB_PASS: saspass
+      DB_NAME: sasdb
+      DB_PORT: 5432
+      PORT: 3000
+    depends_on:
+      - postgres
+    expose:
+      - "3000"
+    restart: unless-stopped
+    networks:
+      - sasnet
+
+  api-rust:
+    build:
+      context: ./services/api-rust
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: postgres
+      DB_USER: sas
+      DB_PASS: saspass
+      DB_NAME: sasdb
+      DB_PORT: 5432
+      PORT: 8080
+    depends_on:
+      - postgres
+    expose:
+      - "8080"
+    restart: unless-stopped
+    networks:
+      - sasnet
+
+  api-python:
+    build:
+      context: ./services/api-python
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: postgres
+      DB_USER: sas
+      DB_PASS: saspass
+      DB_NAME: sasdb
+      DB_PORT: 5432
+    depends_on:
+      - postgres
+    expose:
+      - "8000"
+    restart: unless-stopped
+    networks:
+      - sasnet
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+      - api-node
+      - api-rust
+      - api-python
+    restart: unless-stopped
+    networks:
+      - sasnet
+
+volumes:
+  pgdata:
+
+networks:
+  sasnet:
+    driver: bridge

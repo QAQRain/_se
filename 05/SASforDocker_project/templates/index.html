@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>校務行政系統</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-[#0d1117] text-gray-200">
+
+<div id="loginScreen" class="hidden min-h-screen flex items-center justify-center p-4"></div>
+
+<div id="app" class="hidden min-h-screen">
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-60 bg-[#161b22] border-r border-[#30363d] z-40 flex flex-col"></aside>
+  <div class="ml-60 flex flex-col min-h-screen">
+    <header id="topbar" class="bg-[#161b22] border-b border-[#30363d] px-6 py-3 flex items-center justify-between sticky top-0 z-30"></header>
+    <main id="content" class="flex-1 p-6 max-w-[1200px] w-full mx-auto"></main>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toast" class="fixed top-4 right-4 z-50 hidden"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
+<!-- Docker Microservices Status -->
+<div class="card mt-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong>Docker 微服務系統狀態</strong>
+    <button class="btn btn-sm btn-outline-primary" onclick="checkDockerStatus()">重新檢查</button>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="border rounded p-3 h-100">
+          <h6>Node.js API</h6>
+          <div id="node-health" class="text-muted small">尚未檢查</div>
+          <div id="node-db" class="text-muted small">尚未檢查</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="border rounded p-3 h-100">
+          <h6>Rust API</h6>
+          <div id="node-rust-health" class="text-muted small">尚未檢查</div>
+          <div id="node-rust-db" class="text-muted small">尚未檢查</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="border rounded p-3 h-100">
+          <h6>Python API</h6>
+          <div id="node-py-health" class="text-muted small">尚未檢查</div>
+          <div id="node-py-db" class="text-muted small">尚未檢查</div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2 small text-muted">
+      此區塊展示 nginx（Reverse Proxy + Web Server）、PostgreSQL、Node.js、Rust、Python 等服務在 Docker 容器中是否正常運作。
+    </div>
+  </div>
+</div>
+
+<script>
+async function fetchJson(url) {
+  try {
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+async function checkDockerStatus() {
+  const set = (id, text, ok) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = text;
+      el.className = ok ? 'text-success small' : 'text-danger small';
+    }
+  };
+
+  const h = await fetchJson('/api/node/health');
+  set('node-health', h.status === 'ok' ? 'Health: OK' : 'Health: FAIL', h.status === 'ok');
+  const d = await fetchJson('/api/node/db');
+  set('node-db', d.status === 'ok' ? 'DB: OK' : 'DB: FAIL', d.status === 'ok');
+
+  const rh = await fetchJson('/api/rust/health');
+  set('node-rust-health', rh.status === 'ok' ? 'Health: OK' : 'Health: FAIL', rh.status === 'ok');
+  const rd = await fetchJson('/api/rust/db');
+  set('node-rust-db', rd.status === 'ok' ? 'DB: OK' : 'DB: FAIL', rd.status === 'ok');
+
+  const ph = await fetchJson('/api/python/health');
+  set('node-py-health', ph.status === 'ok' ? 'Health: OK' : 'Health: FAIL', ph.status === 'ok');
+  const pd = await fetchJson('/api/python/db');
+  set('node-py-db', pd.status === 'ok' ? 'DB: OK' : 'DB: FAIL', pd.status === 'ok');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkDockerStatus();
+});
+</script>

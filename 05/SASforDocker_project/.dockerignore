@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# SQLite（容器啟動時會自動重建 + 種子初始化）
+data/
+
+# 文件
+*.md
+
+# Docker 自身
+docker-compose.yml
+.dockerignore
+
+# VSCode / git
+.vscode/
+.git/
+.gitignore
