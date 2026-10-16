@@ -21,6 +21,8 @@ Docker 是一個容器化平台，利用「容器」（Container）將應用程�
 | `docker stop <container>` | 停止執行中的容器 | `docker stop abc123` |
 | `docker rm <container>` | 刪除容器（需先停止或加 `-f`） | `docker rm abc123` |
 | `docker build -t <名稱> .` | 從 Dockerfile 建立自訂映像 | `docker build -t my-app .` |
+| `docker compose up --build` | 建置並啟動 compose 內所有服務 | `docker compose up --build` |
+| `docker compose down` | 停止並移除 compose 內所有容器與網路 | `docker compose down` |
 
 ## 實際應用：透過 Docker 使用 OpenCode
 
@@ -78,6 +80,7 @@ cd schooluse/docker_project/SASforDocker_project
 docker compose up --build
 ```
 完成後開啟 `http://localhost` 查看系統狀態。
+
 ## 實作練習：用 Docker 建置微服務系統（SASforDocker_project）
 
 為了實際學會 Docker 的用法，這裡也做了一個簡短練習：
@@ -93,11 +96,60 @@ docker compose up --build
 cd schooluse/docker_project/SASforDocker_project
 docker compose up --build
 ```
-**關閉：**
-```bash
-docker compose down
-```
 
 **檢查：** 打開瀏覽器 `http://localhost`，查看頁面下方的狀態是否全部顯示 OK。
 
+**關閉系統：**
+```bash
+# 停止並移除所有容器與網路（Postgres 資料會保留）
+docker compose down
+
+# 連同資料 volume 一起清除
+docker compose down -v
+```
+
+> 在 `docker compose up` 的前台畫面按 `Ctrl+C` 只是中斷日誌，容器可能仍在背景執行，還是要用 `docker compose down` 才能真正關閉。可用 `docker compose ps` 確認是否已全部關閉。
+
 > 補充：`Dockerfile` 是「建置映像的食譜」，`docker-compose.yml` 則是「統一管理多個容器怎麼跑」的編排檔。
+
+## 繳交檔案與架構
+
+### 繳交檔案清單（位於 `SASforDocker_project/`）
+
+| 檔案 / 資料夾 | 說明 |
+| --- | --- |
+| `docker-compose.yml` | **必要**：多服務編排 |
+| `Dockerfile` | **必要**：Flask（SAS）映像，用 gunicorn 執行 |
+| `services/api-node/Dockerfile` | Node.js 映像（Express API） |
+| `services/api-rust/Dockerfile` | Rust 映像（Axum API，多階段建置） |
+| `services/api-python/Dockerfile` | Python 映像（FastAPI API） |
+| `nginx/Dockerfile`、`nginx/nginx.conf` | Nginx 映像與反向代理設定 |
+| `db/init.sql` | PostgreSQL 初始化腳本 |
+| `requirements.txt` | Flask 相關相依套件 |
+| `app.py`、`db.py`、`seed.py`、`schema.sql`、`static/`、`templates/` | SAS 應用本體 |
+| `.dockerignore` | 建置時排除不必要的檔案 |
+| `README-DOCKER.md` | 本專案的 Docker 說明 |
+
+### 架構圖
+
+```text
+                    瀏覽器 http://localhost
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │  nginx (80)   │  Web Server + Reverse Proxy
+                    └───────┬───────┘
+        ┌───────────────┬───┴────────┬───────────────┐
+        ▼               ▼            ▼               ▼
+   / (Flask)      /api/node/*   /api/rust/*    /api/python/*
+   web:5000       api-node:3000 api-rust:8080  api-python:8000
+        │               │            │               │
+        └───────────────┴────────────┴───────────────┘
+                            │  (Docker 內部網路 sasnet)
+                            ▼
+                    ┌───────────────┐
+                    │ postgres:5432 │  PostgreSQL
+                    └───────────────┘
+```
+
+六個服務各自獨立映像：`nginx`、`web`(Flask)、`api-node`、`api-rust`、`api-python`、`postgres`。

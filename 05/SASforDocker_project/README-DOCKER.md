@@ -52,6 +52,20 @@ SASforDocker_project/
    登入可用 demo 帳號（參考 app.py 註解）：admin/admin123 等。
    首頁下方會有「Docker 微服務系統狀態」區塊，會自動呼叫各 API 的 /health、/db 顯示 OK/FAIL。
 
+## 驗證步驟
+1. 確認全部容器在執行（6 個服務應全為 `running`）
+   ```bash
+   docker compose ps
+   ```
+2. 瀏覽器開啟 `http://localhost`，能出現 SAS 登入頁 → nginx + web 正常。
+3. 首頁下方「Docker 微服務系統狀態」的 Health / DB 全部顯示綠色 OK → 系統完成。
+4. 若某項顯示 FAIL，單獨查該服務日誌：
+   ```bash
+   docker compose logs api-rust --tail=30
+   ```
+   （`api-rust` 換成出問題的服務名稱，如 `api-node`、`api-python`、`postgres`）
+5. 小提醒：Postgres 啟動需要幾秒，若剛開頁面 DB 顯示 FAIL，稍等幾秒按「重新檢查」即可。
+
 ## 停止與清除
 ```bash
 # 停止並移除容器、網路
@@ -68,6 +82,14 @@ docker compose down -v
 - api-python（Python）
 - nginx（web server + reverse proxy）
 - postgres（官方映像）
+
+## 實作注意事項
+- **web 使用單一 gunicorn worker（`-w 1`）**：`seed.py` 首次啟動會先刪除再重建 SQLite 檔，若用多個 worker，會有多個行程同時初始化而互相刪檔，導致 `sqlite3.OperationalError: disk I/O error` 或 `no such table`。因此改為單一 worker，確保初始化只發生一次。
+- **Rust 映像使用多階段建置（multi-stage build）**：第一階段用 `rust:1.88-alpine` 編譯出 release binary，第二階段只複製 binary 到 `alpine`，縮小最終映像。
+  - 注意：Rust builder 版本需 ≥ 1.85，否則相依套件（需要 `edition2024`）會編譯失敗。
+- **PostgreSQL 資料持久化**：透過 `docker-compose.yml` 的 named volume `pgdata`，`docker compose down` 不會清除，需 `down -v`。
+- **只對外開放 80 埠**：各 API 與 Postgres 僅在 Docker 內部網路（`sasnet`）互通，不直接對外暴露。
+- **`.dockerignore`**：排除 `__pycache__/`、`data/`、`*.md` 等，避免垃圾被打包進映像。
 
 ## 展示重點
 首頁新增的「Docker 微服務系統狀態」區塊會同時檢查：
