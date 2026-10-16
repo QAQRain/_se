@@ -72,7 +72,7 @@ Dockerfile 是一個純文字檔，用來**定義如何從既有的 Image 建立
 - `services/api-node/`、`services/api-rust/`、`services/api-python/`：各自獨立映像的極簡 API
 - `db/init.sql`：PostgreSQL 初始化
 - `templates/index.html`：新增「Docker 微服務系統狀態」展示區塊
-- `README-DOCKER.md`：啟動方式與架構說明
+- `README.md`：啟動方式與架構說明
 
 啟動方式（移到 VSCode 後執行）：
 ```bash
@@ -128,7 +128,7 @@ docker compose down -v
 | `requirements.txt` | Flask 相關相依套件 |
 | `app.py`、`db.py`、`seed.py`、`schema.sql`、`static/`、`templates/` | SAS 應用本體 |
 | `.dockerignore` | 建置時排除不必要的檔案 |
-| `README-DOCKER.md` | 本專案的 Docker 說明 |
+| `README.md` | 本專案的 Docker 說明 |
 
 ### 架構圖
 

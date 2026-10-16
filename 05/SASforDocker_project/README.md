@@ -25,7 +25,7 @@ SASforDocker_project/
 │   ├── api-node/             # Node.js（Express）極簡 API
 │   ├── api-rust/             # Rust（Axum）極簡 API（multi-stage build）
 │   └── api-python/           # Python（FastAPI）極簡 API
-└── README-DOCKER.md
+└── README.md
 ```
 
 ## 系統架構
