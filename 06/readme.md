@@ -2,7 +2,7 @@
 
 本文件專門說明本專案的三層測試：**單元測試（server）**、**系統測試（Web API）**、**E2E 測試（Playwright）**。內容包含測試程式碼位置、測試範圍、案例設計、執行方式與預期結果。
 
-一般安裝與啟動說明請看 [README.md](README.md)。
+一般安裝與啟動說明請看 [README.md](test_project_model_map/README.md)。
 
 ## 1. 對應作業要求
 
