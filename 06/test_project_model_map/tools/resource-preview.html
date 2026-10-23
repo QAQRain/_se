@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資源點預覽</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+         background: #1e2229; color: #e6e6e6; height: 100vh; display: flex; flex-direction: column; }
+  header { padding: 8px 14px; background: #272c35; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+           border-bottom: 1px solid #3a4250; }
+  header h1 { font-size: 15px; margin: 0; margin-right: 6px; }
+  button { background: #3a4250; color: #fff; border: 1px solid #4c5668; border-radius: 6px;
+           padding: 5px 10px; font-size: 13px; cursor: pointer; }
+  button:hover { background: #465063; }
+  button.primary { background: #2e7d32; border-color: #388e3c; }
+  .spacer { flex: 1; }
+  .zoomlabel { font-size: 12px; color: #9aa4b2; }
+  main { flex: 1; display: flex; min-height: 0; }
+  #viewport { flex: 1; overflow: auto; position: relative; background: #14161a; }
+  #stage { position: relative; transform-origin: 0 0; }
+  #stage img { display: block; pointer-events: none; user-select: none; width: 100%; height: 100%; }
+  #overlay { position: absolute; top: 0; left: 0; }
+  .marker { position: absolute; width: 0; height: 0; }
+  .marker .dot { position: absolute; width: 25px; height: 25px; border-radius: 50%;
+                 border: 1.5px solid #fff; transform: translate(-50%, -50%);
+                 box-shadow: 0 0 3px rgba(0,0,0,.9); overflow: hidden; }
+  .marker .dot img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; pointer-events: none; }
+  .marker .label { position: absolute; left: 8px; top: -14px; white-space: nowrap; font-size: 12px;
+                   color: #fff; background: rgba(0,0,0,.65); padding: 0 4px; border-radius: 3px;
+                   display: none; text-shadow: 0 1px 2px #000; }
+  .marker:hover .label { display: block; z-index: 2; }
+  .marker .dot:hover { filter: brightness(1.4); }
+  .hint { position: absolute; top: 8px; left: 12px; z-index: 5; font-size: 12px; color: #bbb; background: rgba(0,0,0,.5);
+          padding: 4px 8px; border-radius: 4px; pointer-events: none; }
+  aside { width: 300px; border-left: 1px solid #3a4250; background: #22262e; display: flex; flex-direction: column;
+          overflow-y: auto; }
+  aside section { padding: 10px 12px; border-bottom: 1px solid #333a44; }
+  aside h2 { font-size: 13px; margin: 0 0 6px; color: #9aa4b2; }
+  textarea { width: 100%; height: 160px; background: #191d23; color: #7fd97f; border: 1px solid #3a4250;
+             border-radius: 5px; font-family: monospace; font-size: 11px; padding: 6px; resize: vertical; }
+  .btn-row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .count { font-size: 12px; color: #9aa4b2; margin-left: 6px; }
+  .show-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #c3c9d2; margin-bottom: 3px; cursor: pointer; }
+  .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(255,255,255,.6); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>資源點預覽</h1>
+  <button id="loadBtn" class="primary">顯示</button>
+  <button id="loadFromPickerBtn">讀取標點工具資料</button>
+  <span class="count" id="count">0 個點</span>
+  <span class="spacer"></span>
+  <button id="resetViewBtn">重設視圖</button>
+  <button id="one2oneBtn">1:1</button>
+  <button id="zinBtn">＋</button>
+  <button id="zoutBtn">－</button>
+  <span class="zoomlabel" id="zoomLabel">100%</span>
+</header>
+
+<main>
+  <div id="viewport">
+    <div class="hint">拖曳地圖＝移動｜滾輪/＋－＝縮放｜滑鼠停在點上＝顯示名稱</div>
+    <div id="stage">
+      <img id="mapImg" src="../assets/resource-map.png" alt="地圖">
+      <div id="overlay"></div>
+    </div>
+  </div>
+
+  <aside>
+    <section>
+      <h2>顯示切換</h2>
+      <div id="showToggles"></div>
+      <p style="font-size:12px;color:#9aa4b2;margin-top:4px">勾選的類型才顯示，方便比對。</p>
+    </section>
+    <section>
+      <h2>貼上標點 JSON</h2>
+      <textarea id="jsonIn" placeholder='{"resources": [{"id":"r1","type":"pi","name":"","x":65.11,"y":13.92}, ...]}'></textarea>
+      <div class="btn-row">
+        <button id="loadBtn2" class="primary">顯示</button>
+        <button id="sampleBtn">填入範例</button>
+      </div>
+      <p style="font-size:12px;color:#9aa4b2;margin-top:4px">直接貼「標點工具」匯出的內容（resources 陣列）即可。</p>
+    </section>
+  </aside>
+</main>
+
+<script>
+const TYPES = [
+  { id: 'pi',       name: '皮',   color: '#a1887f', image: '../assets/res-points/pi.png' },
+  { id: 'tie',      name: '鐵',   color: '#90a4ae', image: '../assets/res-points/tie.png' },
+  { id: 'shi',      name: '石',   color: '#9e9e9e', image: '../assets/res-points/shi.png' },
+  { id: 'mu',       name: '木',   color: '#5d4037', image: '../assets/res-points/mu.png' },
+  { id: 'liang',    name: '糧',   color: '#ffb74d', image: '../assets/res-points/liang.png' },
+  { id: 'ma',       name: '馬',   color: '#b39ddb', image: '../assets/res-points/ma.png' },
+  { id: 'yizhan',   name: '驛站', color: '#ffffff' },
+  { id: 'guankou',  name: '關口', color: '#ef5350' }
+];
+const TYPE_BY_ID = Object.fromEntries(TYPES.map(t => [t.id, t]));
+const LEVELS = [
+  { v: 1, name: 'Lv.1', colorName: '白', color: '#ffffff' },
+  { v: 2, name: 'Lv.2', colorName: '綠', color: '#4caf72' },
+  { v: 3, name: 'Lv.3', colorName: '藍', color: '#4a90d9' },
+  { v: 4, name: 'Lv.4', colorName: '紫', color: '#9a6bd1' }
+];
+const LEVEL_BY_V = Object.fromEntries(LEVELS.map(l => [l.v, l]));
+
+const viewport = document.getElementById('viewport');
+const stage = document.getElementById('stage');
+const img = document.getElementById('mapImg');
+const overlay = document.getElementById('overlay');
+const countEl = document.getElementById('count');
+
+let NAT_W = 1122, NAT_H = 771;
+let scale = 1;
+let points = []; // {id, type, name, x, y, el}
+let pan = null;
+
+function fitScale() {
+  const pad = 20;
+  return Math.min((viewport.clientWidth - pad) / NAT_W, (viewport.clientHeight - pad) / NAT_H);
+}
+
+function applyScale() {
+  stage.style.width = (NAT_W * scale) + 'px';
+  stage.style.height = (NAT_H * scale) + 'px';
+  overlay.style.width = stage.style.width;
+  overlay.style.height = stage.style.height;
+  document.getElementById('zoomLabel').textContent = Math.round(scale * 100) + '%';
+}
+
+function centerMap() {
+  const s = fitScale();
+  scale = s;
+  applyScale();
+  viewport.scrollLeft = (stage.clientWidth - viewport.clientWidth) / 2;
+  viewport.scrollTop = (stage.clientHeight - viewport.clientHeight) / 2;
+}
+
+function zoomAt(cx, cy, factor) {
+  const wx = cx + viewport.scrollLeft;
+  const wy = cy + viewport.scrollTop;
+  const oldScale = scale;
+  scale = Math.max(fitScale(), Math.min(8, scale * factor));
+  viewport.scrollLeft = (wx / oldScale) * scale - cx;
+  viewport.scrollTop = (wy / oldScale) * scale - cy;
+  applyScale();
+}
+
+function isShow(type) {
+  const el = document.getElementById('show_' + type);
+  return el ? el.checked : true;
+}
+
+function applyShowFilters() {
+  for (const p of points) {
+    if (!p.el) continue;
+    p.el.style.display = isShow(p.type) ? '' : 'none';
+  }
+}
+
+function renderPoint(p) {
+  const div = document.createElement('div');
+  div.className = 'marker';
+  div.style.left = p.x + '%';
+  div.style.top = p.y + '%';
+  if (!isShow(p.type)) div.style.display = 'none';
+
+  const t = TYPE_BY_ID[p.type] || TYPES[0];
+  const lv = LEVEL_BY_V[p.level] || LEVELS[0];
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.style.background = t.color;
+  dot.style.borderColor = lv.color;
+  if (t.image) {
+    const im = document.createElement('img');
+    im.src = t.image;
+    im.alt = t.name;
+    im.draggable = false;
+    im.addEventListener('error', () => im.remove());
+    dot.appendChild(im);
+  }
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = (p.name ? p.name + ' · ' : '') + t.name + ' · ' + lv.name;
+
+  div.appendChild(dot);
+  div.appendChild(label);
+  overlay.appendChild(div);
+  return div;
+}
+
+function renderAll() {
+  overlay.innerHTML = '';
+  for (const p of points) p.el = renderPoint(p);
+  countEl.textContent = `${points.length} 個點`;
+}
+
+function parseInput() {
+  const d = JSON.parse(document.getElementById('jsonIn').value);
+  const arr = Array.isArray(d) ? d : d.resources;
+  if (!Array.isArray(arr)) throw new Error('找不到 resources 陣列');
+  points = arr.map(m => ({ id: m.id || '', type: m.type || 'pi', name: m.name || '', x: Number(m.x), y: Number(m.y), el: null }));
+}
+
+function doLoad() {
+  try {
+    parseInput();
+    renderAll();
+  } catch (e) {
+    alert('JSON 格式錯誤：' + e.message);
+  }
+}
+
+function buildShowToggles() {
+  const box = document.getElementById('showToggles');
+  box.innerHTML = '';
+  for (const t of TYPES) {
+    const lab = document.createElement('label');
+    lab.className = 'show-row';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.id = 'show_' + t.id;
+    cb.checked = true;
+    cb.addEventListener('change', applyShowFilters);
+    lab.appendChild(cb);
+    lab.innerHTML += `<span class="swatch" style="background:${t.color}"></span>${t.name}`;
+    box.appendChild(lab);
+  }
+}
+
+overlay.addEventListener('pointerdown', (e) => {
+  if (e.target !== overlay || e.button !== 0) return;
+  pan = { startX: e.clientX, startY: e.clientY, sl: viewport.scrollLeft, st: viewport.scrollTop, moved: false };
+  overlay.setPointerCapture(e.pointerId);
+});
+
+overlay.addEventListener('pointermove', (e) => {
+  if (!pan) return;
+  const dx = e.clientX - pan.startX;
+  const dy = e.clientY - pan.startY;
+  if (!pan.moved && Math.abs(dx) + Math.abs(dy) > 5) pan.moved = true;
+  if (pan.moved) {
+    viewport.scrollLeft = pan.sl - dx;
+    viewport.scrollTop = pan.st - dy;
+  }
+});
+
+overlay.addEventListener('pointerup', () => { pan = null; });
+overlay.addEventListener('pointercancel', () => { pan = null; });
+
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const rect = viewport.getBoundingClientRect();
+  zoomAt(e.clientX - rect.left, e.clientY - rect.top, e.deltaY < 0 ? 1.15 : 1 / 1.15);
+}, { passive: false });
+
+document.getElementById('resetViewBtn').addEventListener('click', () => centerMap());
+
+document.getElementById('one2oneBtn').addEventListener('click', () => {
+  scale = 1;
+  applyScale();
+  viewport.scrollLeft = Math.max(0, (stage.clientWidth - viewport.clientWidth) / 2);
+  viewport.scrollTop = Math.max(0, (stage.clientHeight - viewport.clientHeight) / 2);
+});
+
+document.getElementById('zinBtn').addEventListener('click', () => zoomAt(viewport.clientWidth / 2, viewport.clientHeight / 2, 1.3));
+document.getElementById('zoutBtn').addEventListener('click', () => zoomAt(viewport.clientWidth / 2, viewport.clientHeight / 2, 1 / 1.3));
+
+document.getElementById('loadBtn').addEventListener('click', doLoad);
+document.getElementById('loadBtn2').addEventListener('click', doLoad);
+
+document.getElementById('loadFromPickerBtn').addEventListener('click', () => {
+  try {
+    const raw = localStorage.getItem('resource_picker_points');
+    if (!raw) throw new Error('讀不到標點工具資料（若用 file:// 開啟可能因瀏覽器限制無法跨檔讀取，請改用貼上 JSON）');
+    const arr = JSON.parse(raw);
+    points = arr.map(m => ({ id: m.id || '', type: m.type || 'pi', level: m.level || 1, name: m.name || '', x: Number(m.x), y: Number(m.y), el: null }));
+    renderAll();
+  } catch (e) {
+    alert(e.message);
+  }
+});
+
+document.getElementById('sampleBtn').addEventListener('click', () => {
+  document.getElementById('jsonIn').value = JSON.stringify({
+    resources: [
+      { id: 'r1', type: 'pi', level: 3, name: '範例皮料', x: 30.5, y: 20.1 },
+      { id: 'r2', type: 'tie', level: 1, name: '範例鐵礦', x: 40, y: 45 },
+      { id: 'r3', type: 'guankou', level: 4, name: '範例關口', x: 55, y: 65.5 }
+    ]
+  }, null, 2);
+});
+
+function init() {
+  NAT_W = img.naturalWidth;
+  NAT_H = img.naturalHeight;
+  buildShowToggles();
+  centerMap();
+}
+
+img.addEventListener('load', init);
+if (img.complete && img.naturalWidth > 0) init();
+</script>
+</body>
+</html>

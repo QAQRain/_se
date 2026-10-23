@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>據點座標點選工具</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+         background: #1e2229; color: #e6e6e6; height: 100vh; display: flex; flex-direction: column; }
+  header { padding: 8px 14px; background: #272c35; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+           border-bottom: 1px solid #3a4250; }
+  header h1 { font-size: 15px; margin: 0; margin-right: 6px; }
+  button { background: #3a4250; color: #fff; border: 1px solid #4c5668; border-radius: 6px;
+           padding: 5px 10px; font-size: 13px; cursor: pointer; }
+  button:hover { background: #465063; }
+  button.primary { background: #2e7d32; border-color: #388e3c; }
+  button.danger { background: #b71c1c; border-color: #d32f2f; }
+  .spacer { flex: 1; }
+  .zoomlabel { font-size: 12px; color: #9aa4b2; }
+  main { flex: 1; display: flex; min-height: 0; }
+  #viewport { flex: 1; overflow: auto; position: relative; background: #14161a; }
+  #stage { position: relative; transform-origin: 0 0; }
+  #stage img { display: block; pointer-events: none; user-select: none; width: 100%; height: 100%; }
+  #overlay { position: absolute; top: 0; left: 0; }
+  .marker { position: absolute; width: 0; height: 0; }
+  .marker .dot { position: absolute; width: 12px; height: 12px; border-radius: 50%;
+                 background: rgba(244, 67, 54, 0.85); border: 2px solid #fff; transform: translate(-50%, -50%);
+                 cursor: grab; box-shadow: 0 0 4px rgba(0,0,0,.8); }
+  .marker .dot:hover { background: #ff5252; }
+  .marker.drag .dot { cursor: grabbing; background: #ffeb3b; }
+  .marker .label { position: absolute; left: 8px; top: -16px; white-space: nowrap; font-size: 12px;
+                   color: #fff; background: rgba(0,0,0,.65); padding: 1px 5px; border-radius: 3px;
+                   text-shadow: 0 1px 2px #000; }
+  .marker.unnamed .label { color: #ffd54f; }
+  .marker.sel .dot { background: #3f51b5; box-shadow: 0 0 8px #3f51b5; }
+  .hint { position: absolute; top: 8px; left: 12px; z-index: 5; font-size: 12px; color: #bbb; background: rgba(0,0,0,.5);
+          padding: 4px 8px; border-radius: 4px; pointer-events: none; }
+  aside { width: 300px; border-left: 1px solid #3a4250; background: #22262e; display: flex; flex-direction: column; }
+  aside section { padding: 10px 12px; border-bottom: 1px solid #333a44; }
+  aside h2 { font-size: 13px; margin: 0 0 6px; color: #9aa4b2; }
+  aside label { font-size: 12px; display: block; margin-bottom: 4px; color: #c3c9d2; }
+  aside input[type=text] { width: 100%; background: #191d23; color: #fff; border: 1px solid #3a4250;
+                           border-radius: 5px; padding: 5px 8px; font-size: 13px; }
+  aside .field { margin-bottom: 8px; }
+  .coord-row { font-size: 12px; color: #9aa4b2; margin-bottom: 6px; }
+  textarea { width: 100%; height: 160px; background: #191d23; color: #7fd97f; border: 1px solid #3a4250;
+             border-radius: 5px; font-family: monospace; font-size: 11px; padding: 6px; resize: vertical; }
+  .btn-row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .count { font-size: 12px; color: #9aa4b2; margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>據點座標點選工具</h1>
+  <button id="loadCandBtn">載入候選位置</button>
+  <button id="exportBtn" class="primary">匯出 JSON</button>
+  <button id="downloadBtn">下載 .json</button>
+  <button id="clearBtn" class="danger">清除全部</button>
+  <span class="count" id="count">0 個標點</span>
+  <span class="spacer"></span>
+  <button id="resetViewBtn">重設視圖</button>
+  <button id="one2oneBtn">1:1</button>
+  <button id="zinBtn">＋</button>
+  <button id="zoutBtn">－</button>
+  <span class="zoomlabel" id="zoomLabel">100%</span>
+</header>
+
+<main>
+  <div id="viewport">
+    <div class="hint">點擊地圖空白處新增據點｜拖曳圓點調整位置｜點擊圓點編輯名字</div>
+    <div id="stage">
+      <img id="mapImg" src="../assets/map/new.png" alt="地圖">
+      <div id="overlay"></div>
+    </div>
+  </div>
+
+  <aside>
+    <section id="editSection">
+      <h2>編輯標點</h2>
+      <div class="coord-row" id="editCoord">未選取標點</div>
+      <div class="field">
+        <label>據點名稱</label>
+        <input type="text" id="nameInput" placeholder="例如：洛陽" disabled>
+      </div>
+      <div class="btn-row">
+        <button id="delBtn" class="danger" disabled>刪除此標點</button>
+        <button id="centerBtn" disabled>地圖跳到這點</button>
+      </div>
+    </section>
+    <section>
+      <h2>匯入 markers.json</h2>
+      <textarea id="jsonIn" placeholder='貼上 {"markers": [...]} 後按「匯入並替換」'></textarea>
+      <div class="btn-row">
+        <button id="importBtn" class="primary">匯入並替換標點</button>
+      </div>
+      <p class="coord-row" style="margin-top:6px">建議先按「重設視圖」用 100% 檢視再微調。</p>
+    </section>
+    <section>
+      <h2>匯出 markers.json</h2>
+      <textarea id="jsonOut" readonly placeholder="點「匯出 JSON」產生內容"></textarea>
+      <div class="btn-row">
+        <button id="copyBtn">複製內容</button>
+        <button id="exportBtn2" class="primary">匯出 JSON</button>
+      </div>
+    </section>
+  </aside>
+</main>
+
+<script>
+const CANDIDATES = [[65.11,13.92],[66.52,15.8],[61.07,17.55],[44.29,24.15],[42.62,27.85],[58.2,30.02],[52.79,32.26],[61.8,36.38],[25.54,38.5],[62.15,40.68],[39.48,43.83],[20.09,46.91],[12.75,47.46],[71.37,48.79],[48.88,50.12],[20.52,50.61],[46.74,52.06],[80.34,53.87],[13.13,55.15],[13.13,58.78],[16.87,59.81],[33.82,59.02],[98.15,61.8],[46.39,62.65],[27.08,62.05],[46.7,65.74],[51.03,66.16],[71.37,65.86],[53.48,67.49],[60.26,67.8],[72.27,68.46],[92.32,68.52],[44.21,71.79],[72.45,72.09],[39.18,76.57],[75.84,76.82],[71.5,77.6],[39.53,80.51],[76.18,80.51],[36.18,85.77],[36.22,89.35]];
+
+const viewport = document.getElementById('viewport');
+const stage = document.getElementById('stage');
+const img = document.getElementById('mapImg');
+const overlay = document.getElementById('overlay');
+const countEl = document.getElementById('count');
+
+let NAT_W = 1122, NAT_H = 771;
+let scale = 1, minScale = 0.1;
+let markers = []; // {id, name, x, y, el}
+let selected = null;
+let nextId = 1;
+let drag = null;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('coord_picker_markers_new');
+    if (raw) {
+      markers = JSON.parse(raw).map(m => ({ ...m, el: null }));
+      nextId = markers.reduce((a, m) => Math.max(a, parseInt(m.id.slice(1)) + 1), 1);
+    }
+  } catch (e) {}
+}
+
+function saveState() {
+  const data = markers.map(m => ({ id: m.id, name: m.name, x: m.x, y: m.y }));
+  localStorage.setItem('coord_picker_markers_new', JSON.stringify(data));
+}
+
+function fitScale() {
+  const pad = 20;
+  return Math.min((viewport.clientWidth - pad) / NAT_W, (viewport.clientHeight - pad) / NAT_H);
+}
+
+function applyScale() {
+  stage.style.width = (NAT_W * scale) + 'px';
+  stage.style.height = (NAT_H * scale) + 'px';
+  overlay.style.width = stage.style.width;
+  overlay.style.height = stage.style.height;
+  document.getElementById('zoomLabel').textContent = Math.round(scale * 100) + '%';
+}
+
+function centerMap() {
+  const s = fitScale();
+  scale = s;
+  applyScale();
+  viewport.scrollLeft = (stage.clientWidth - viewport.clientWidth) / 2;
+  viewport.scrollTop = (stage.clientHeight - viewport.clientHeight) / 2;
+}
+
+function clientToPct(cx, cy) {
+  const rect = viewport.getBoundingClientRect();
+  const vx = cx - rect.left + viewport.scrollLeft;
+  const vy = cy - rect.top + viewport.scrollTop;
+  const x = Math.round(vx / scale / NAT_W * 10000) / 100;
+  const y = Math.round(vy / scale / NAT_H * 10000) / 100;
+  return { x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) };
+}
+
+function zoomAt(cx, cy, factor) {
+  const wx = cx + viewport.scrollLeft;
+  const wy = cy + viewport.scrollTop;
+  const oldScale = scale;
+  scale = Math.max(fitScale(), Math.min(8, scale * factor));
+  viewport.scrollLeft = (wx / oldScale) * scale - cx;
+  viewport.scrollTop = (wy / oldScale) * scale - cy;
+  applyScale();
+}
+
+function addMarker(xPct, yPct, name = '', el = null) {
+  const m = { id: 'm' + (nextId++), name, x: Math.round(xPct * 100) / 100, y: Math.round(yPct * 100) / 100, el: el };
+  m.el = renderMarker(m);
+  markers.push(m);
+  updateCount();
+  saveState();
+  return m;
+}
+
+function renderMarker(m) {
+  const div = document.createElement('div');
+  div.className = 'marker' + (m.name ? '' : ' unnamed');
+  div.style.left = m.x + '%';
+  div.style.top = m.y + '%';
+
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = m.name || '（未命名）';
+
+  div.appendChild(dot);
+  div.appendChild(label);
+
+  dot.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+    if (e.button !== 0) return;
+    select(m);
+    startDrag(e, m);
+  });
+
+  overlay.appendChild(div);
+  return div;
+}
+
+function startDrag(e, m) {
+  drag = { m, startX: e.clientX, startY: e.clientY };
+  m.el.classList.add('drag');
+  overlay.setPointerCapture(e.pointerId);
+}
+
+function moveDrag(e) {
+  if (!drag) return;
+  const p = clientToPct(e.clientX, e.clientY);
+  drag.m.x = p.x;
+  drag.m.y = p.y;
+  drag.m.el.style.left = p.x + '%';
+  drag.m.el.style.top = p.y + '%';
+}
+
+function endDrag(e) {
+  if (!drag) return;
+  drag.m.el.classList.remove('drag');
+  drag = null;
+  saveState();
+  updateEdit();
+}
+
+function select(m) {
+  selected = m;
+  for (const mm of markers) mm.el.classList.toggle('sel', mm === m);
+  nameInput.value = m.name;
+  nameInput.disabled = false;
+  delBtn.disabled = false;
+  centerBtn.disabled = false;
+  updateEdit();
+}
+
+function updateEdit() {
+  editCoord.textContent = selected ? `x: ${selected.x}%　y: ${selected.y}%` : '未選取標點';
+}
+
+function updateCount() {
+  const named = markers.filter(m => m.name).length;
+  countEl.textContent = `${markers.length} 個標點（已命名 ${named}）`;
+}
+
+function buildJSON() {
+  return JSON.stringify({
+    markers: markers.map(m => ({ id: m.id, name: m.name, x: m.x, y: m.y, items: [] }))
+  }, null, 2);
+}
+
+function refreshAll() {
+  overlay.innerHTML = '';
+  for (const m of markers) m.el = renderMarker(m);
+  updateCount();
+}
+
+overlay.addEventListener('pointerdown', (e) => {
+  if (e.target !== overlay || e.button !== 0) return;
+  const p = clientToPct(e.clientX, e.clientY);
+  addMarker(p.x, p.y);
+});
+
+overlay.addEventListener('pointermove', moveDrag);
+overlay.addEventListener('pointerup', endDrag);
+overlay.addEventListener('pointercancel', endDrag);
+
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const rect = viewport.getBoundingClientRect();
+  zoomAt(e.clientX - rect.left, e.clientY - rect.top, e.deltaY < 0 ? 1.15 : 1 / 1.15);
+}, { passive: false });
+
+// --- UI controls ---
+const nameInput = document.getElementById('nameInput');
+const delBtn = document.getElementById('delBtn');
+const centerBtn = document.getElementById('centerBtn');
+const editCoord = document.getElementById('editCoord');
+
+nameInput.addEventListener('input', () => {
+  if (!selected) return;
+  selected.name = nameInput.value.trim();
+  selected.el.classList.toggle('unnamed', !selected.name);
+  selected.el.querySelector('.label').textContent = selected.name || '（未命名）';
+  updateCount();
+  saveState();
+});
+
+nameInput.addEventListener('change', () => {
+  if (selected) select(selected); // refresh selection view
+});
+
+delBtn.addEventListener('click', () => {
+  if (!selected) return;
+  selected.el.remove();
+  markers = markers.filter(m => m !== selected);
+  selected = null;
+  nameInput.value = '';
+  nameInput.disabled = true;
+  delBtn.disabled = true;
+  centerBtn.disabled = true;
+  editCoord.textContent = '未選取標點';
+  updateCount();
+  saveState();
+});
+
+centerBtn.addEventListener('click', () => {
+  if (!selected) return;
+  const sx = selected.x / 100 * NAT_W * scale - viewport.clientWidth / 2;
+  const sy = selected.y / 100 * NAT_H * scale - viewport.clientHeight / 2;
+  viewport.scrollLeft = sx;
+  viewport.scrollTop = sy;
+});
+
+document.getElementById('loadCandBtn').addEventListener('click', () => {
+  if (markers.length) {
+    if (!confirm('已有標點，載入候選位置會直接加入，確定？')) return;
+  }
+  for (const [x, y] of CANDIDATES) addMarker(x, y);
+});
+
+document.getElementById('resetViewBtn').addEventListener('click', () => centerMap());
+
+document.getElementById('one2oneBtn').addEventListener('click', () => {
+  scale = 1;
+  applyScale();
+  viewport.scrollLeft = Math.max(0, (stage.clientWidth - viewport.clientWidth) / 2);
+  viewport.scrollTop = Math.max(0, (stage.clientHeight - viewport.clientHeight) / 2);
+});
+
+const jsonIn = document.getElementById('jsonIn');
+document.getElementById('importBtn').addEventListener('click', () => {
+  try {
+    const d = JSON.parse(jsonIn.value);
+    if (!Array.isArray(d.markers)) throw new Error('缺少 markers 陣列');
+    if (markers.length && !confirm('匯入會取代目前的標點，確定？')) return;
+    overlay.innerHTML = '';
+    markers = d.markers.map(m => ({ id: m.id, name: m.name || '', x: Number(m.x), y: Number(m.y), el: null }));
+    nextId = markers.reduce((a, m) => Math.max(a, parseInt(m.id.slice(1)) + 1), 1);
+    refreshAll();
+    saveState();
+    centerMap();
+    selected = null;
+    nameInput.value = '';
+    nameInput.disabled = true;
+    delBtn.disabled = true;
+    centerBtn.disabled = true;
+    editCoord.textContent = '未選取標點';
+    updateCount();
+  } catch (e) {
+    alert('JSON 格式錯誤：' + e.message);
+  }
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  if (!confirm('清除全部標點？此動作無法復原。')) return;
+  overlay.innerHTML = '';
+  markers = [];
+  selected = null;
+  nameInput.value = '';
+  nameInput.disabled = true;
+  delBtn.disabled = true;
+  centerBtn.disabled = true;
+  editCoord.textContent = '未選取標點';
+  nextId = 1;
+  updateCount();
+  saveState();
+});
+
+function doExport() {
+  jsonOut.value = buildJSON();
+}
+
+document.getElementById('exportBtn').addEventListener('click', doExport);
+document.getElementById('exportBtn2').addEventListener('click', doExport);
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  if (!jsonOut.value) doExport();
+  try {
+    await navigator.clipboard.writeText(jsonOut.value);
+    copyBtn.textContent = '已複製！';
+    setTimeout(() => copyBtn.textContent = '複製內容', 1200);
+  } catch (e) {
+    jsonOut.select();
+    document.execCommand('copy');
+  }
+});
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const text = buildJSON();
+  const blob = new Blob([text], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'markers.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+document.getElementById('zinBtn').addEventListener('click', () => zoomAt(viewport.clientWidth / 2, viewport.clientHeight / 2, 1.3));
+document.getElementById('zoutBtn').addEventListener('click', () => zoomAt(viewport.clientWidth / 2, viewport.clientHeight / 2, 1 / 1.3));
+
+// --- init ---
+const jsonOut = document.getElementById('jsonOut');
+const copyBtn = document.getElementById('copyBtn');
+
+img.addEventListener('load', () => {
+  NAT_W = img.naturalWidth;
+  NAT_H = img.naturalHeight;
+  loadState();
+  refreshAll();
+  centerMap();
+});
+
+if (img.complete && img.naturalWidth > 0) {
+  NAT_W = img.naturalWidth;
+  NAT_H = img.naturalHeight;
+  loadState();
+  refreshAll();
+  centerMap();
+}
+</script>
+</body>
+</html>

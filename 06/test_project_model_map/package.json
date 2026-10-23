@@ -1,0 +1,21 @@
+{
+  "name": "test_project_model_map",
+  "version": "1.0.0",
+  "private": true,
+  "description": "三國兵裝據點地圖（學校版）＋ Node.js 後端與三層測試",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "npm run test:unit && npm run test:api",
+    "test:unit": "node --test server/test/data.test.js",
+    "test:api": "node --test tests/api/api.test.js",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "supertest": "^7.0.0"
+  }
+}

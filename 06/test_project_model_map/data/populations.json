@@ -1,0 +1,39 @@
+{
+  "populations": [
+    {
+      "id": "xiangyong",
+      "name": "鄉勇",
+      "image": "assets/population/xiangyong.png"
+    },
+    {
+      "id": "hebeizhuangshi",
+      "name": "河北壯士",
+      "image": "assets/population/hebeizhuangshi.png"
+    },
+    {
+      "id": "jiangdongyiyong",
+      "name": "江東義勇",
+      "image": "assets/population/jiangdongyiyong.png"
+    },
+    {
+      "id": "biandixiaoyong",
+      "name": "邊地驍勇",
+      "image": "assets/population/biandixiaoyong.png"
+    },
+    {
+      "id": "shuzhongjingzhuang",
+      "name": "蜀中精壯",
+      "image": "assets/population/shuzhongjingzhuang.png"
+    },
+    {
+      "id": "zhongyuanzhuangding",
+      "name": "中原壯丁",
+      "image": "assets/population/zhongyuanzhuangding.png"
+    },
+    {
+      "id": "qingxuyishi",
+      "name": "青徐義士",
+      "image": "assets/population/qingxuyishi.png"
+    }
+  ]
+}

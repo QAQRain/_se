@@ -1,0 +1,51 @@
+# 憑證／權杖（絕對不能上傳）
+.git-credentials
+.github_token
+*.token
+.env
+.env.*
+
+# 內部開發筆記（不公開）
+AGENTS.md
+CLAUDE.md
+.opencode/
+
+# 地圖原始素材與截圖（僅本機留存；new.png 為 coord-picker 工具所需）
+assets/map/*
+!assets/map/new.png
+
+# 工具產出的暫存檔
+map-stitched.png
+resource-points.json
+
+# Node.js 相依套件（npm install 後出現，不進版控）
+node_modules/
+
+# 測試產物（test.bat / Playwright 執行後出現，不進版控）
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+coverage/
+.nyc_output/
+.last-run.json
+*.pid
+
+# 套件管理器與執行紀錄（安裝或執行後出現）
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.cache/
+*.log
+
+# 注意：package-lock.json 要保留，用於鎖定相依版本，請勿加入忽略
+
+# 作業系統／編輯器
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+.idea/
+.vscode/

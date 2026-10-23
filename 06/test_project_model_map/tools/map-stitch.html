@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>地圖拼接工具</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+         background: #1e2229; color: #e6e6e6; height: 100vh; display: flex; flex-direction: column; }
+  header { padding: 8px 14px; background: #272c35; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+           border-bottom: 1px solid #3a4250; }
+  header h1 { font-size: 15px; margin: 0; margin-right: 6px; }
+  button { background: #3a4250; color: #fff; border: 1px solid #4c5668; border-radius: 6px;
+           padding: 5px 10px; font-size: 13px; cursor: pointer; }
+  button:hover { background: #465063; }
+  button.primary { background: #2e7d32; border-color: #388e3c; }
+  main { flex: 1; display: flex; min-height: 0; }
+  #viewport { flex: 1; overflow: auto; position: relative; background: #14161a; }
+  #stage { position: relative; transform-origin: 0 0; }
+  #baseImg { position: absolute; top: 0; left: 0; display: block; user-select: none; pointer-events: none; }
+  #topImg { position: absolute; top: 0; left: 0; display: block; user-select: none; cursor: grab;
+            transform-origin: 0 0; }
+  #topImg.dragging { cursor: grabbing; }
+  aside { width: 320px; border-left: 1px solid #3a4250; background: #22262e; display: flex; flex-direction: column; overflow-y: auto; }
+  aside section { padding: 12px; border-bottom: 1px solid #333a44; }
+  aside h2 { font-size: 13px; margin: 0 0 8px; color: #9aa4b2; }
+  aside label { font-size: 12px; display: block; margin-bottom: 4px; color: #c3c9d2; }
+  aside .field { margin-bottom: 10px; }
+  aside input[type=file] { width: 100%; font-size: 12px; color: #c3c9d2; }
+  aside input[type=range] { width: 100%; }
+  aside .coord-row { font-size: 12px; color: #9aa4b2; margin-bottom: 6px; }
+  aside .reset { display: inline-block; margin-right: 6px; }
+  .hint { position: absolute; top: 8px; left: 12px; z-index: 5; font-size: 12px; color: #bbb; background: rgba(0,0,0,.5);
+          padding: 4px 8px; border-radius: 4px; pointer-events: none; }
+  .note { font-size: 12px; color: #9aa4b2; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>地圖拼接工具</h1>
+  <button id="exportBtn" class="primary" disabled>輸出合成 PNG</button>
+  <span class="coord-row" id="info" style="margin:0">尚未載入圖</span>
+  <span style="flex:1"></span>
+  <button id="fitBtn">重設視圖</button>
+</header>
+
+<main>
+  <div id="viewport">
+    <div class="hint">拖曳上層圖對齊｜滾輪放大檢視｜用「拉伸／斜切」調整立體視角造成的變形</div>
+    <div id="stage">
+      <img id="baseImg" alt="底圖">
+      <img id="topImg" alt="上層圖">
+    </div>
+  </div>
+
+  <aside>
+    <section>
+      <h2>載入圖片</h2>
+      <div class="field">
+        <label>底圖（先截的那張，例如下半部）</label>
+        <input type="file" id="baseInput" accept="image/*">
+      </div>
+      <div class="field">
+        <label>上層圖（後截的那張，疊上去對齊）</label>
+        <input type="file" id="topInput" accept="image/*">
+      </div>
+      <p class="note">截圖技巧：兩張同一視角、同一縮放，只平移畫面，中間留約 20–30% 重疊。因遊戲地圖是立體透視，平移時近處/遠處移動量不同，可再用下方的「拉伸／斜切」調整。</p>
+    </section>
+    <section>
+      <h2>對齊</h2>
+      <div class="field">
+        <label>上層透明度：<span id="opacVal">100%</span></label>
+        <input type="range" id="opacSlider" min="0" max="100" value="100">
+      </div>
+      <div class="field">
+        <label>整體縮放（%）：<span id="scaleVal">100%</span></label>
+        <input type="range" id="scaleSlider" min="70" max="130" value="100" step="0.5">
+      </div>
+      <div class="field">
+        <label>寬拉伸（%）：<span id="sxVal">100%</span></label>
+        <input type="range" id="sxSlider" min="70" max="130" value="100" step="0.5">
+      </div>
+      <div class="field">
+        <label>高拉伸（%）：<span id="syVal">100%</span></label>
+        <input type="range" id="sySlider" min="60" max="160" value="100" step="0.5">
+      </div>
+      <div class="field">
+        <label>水平斜切（度）：<span id="kxVal">0°</span></label>
+        <input type="range" id="kxSlider" min="-30" max="30" value="0" step="0.5">
+      </div>
+      <div class="field">
+        <label>垂直斜切（度）：<span id="kyVal">0°</span></label>
+        <input type="range" id="kySlider" min="-30" max="30" value="0" step="0.5">
+      </div>
+      <div class="field">
+        <label>微調：拖曳上層圖移動｜鍵盤方向鍵 1px（Shift＝5px）</label>
+        <div class="coord-row" id="offset">x: 0px　y: 0px</div>
+      </div>
+      <button id="resetOffBtn" class="reset">重設位移</button>
+      <button id="resetDeformBtn">重設拉伸／斜切</button>
+    </section>
+  </aside>
+</main>
+
+<script>
+const viewport = document.getElementById('viewport');
+const stage = document.getElementById('stage');
+const baseImg = document.getElementById('baseImg');
+const topImg = document.getElementById('topImg');
+const info = document.getElementById('info');
+const opacSlider = document.getElementById('opacSlider');
+const scaleSlider = document.getElementById('scaleSlider');
+const sxSlider = document.getElementById('sxSlider');
+const sySlider = document.getElementById('sySlider');
+const kxSlider = document.getElementById('kxSlider');
+const kySlider = document.getElementById('kySlider');
+
+let disp = 1;
+let baseRaw = null;      // {w,h}
+let topRaw = null;       // {w,h}
+let offX = 0, offY = 0;  // 平移（原始像素）
+let scaleTop = 1;        // 整體縮放
+let sx = 1, sy = 1;      // 寬/高拉伸
+let kx = 0, ky = 0;      // 斜切（tan）
+let drag = null;
+
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => resolve({ img, url });
+    img.onerror = () => reject(new Error('無法載入圖片'));
+    img.src = url;
+  });
+}
+
+// 變形矩陣（topImg 局部座標 → 偏移後座標，原始像素）
+function matrixValues() {
+  return { sx, sy, kx, ky, tx: offX, ty: offY };
+}
+
+function applyTop() {
+  if (!topRaw) return;
+  const d = disp;
+  const m = matrixValues();
+  topImg.style.width = (topRaw.w * scaleTop * d) + 'px';
+  topImg.style.height = (topRaw.h * scaleTop * d) + 'px';
+  // CSS matrix(a,b,c,d,e,f): x'=a*x+c*y+e, y'=b*x+d*y+f
+  topImg.style.transform = 'matrix(' +
+    m.sx + ',' + m.ky + ',' + m.kx + ',' + m.sy + ',' +
+    (m.tx * d) + ',' + (m.ty * d) + ')';
+}
+
+function applyLayout() {
+  if (!baseRaw) return;
+  stage.style.width = (baseRaw.w * disp) + 'px';
+  stage.style.height = (baseRaw.h * disp) + 'px';
+  baseImg.style.width = baseRaw.w * disp + 'px';
+  baseImg.style.height = baseRaw.h * disp + 'px';
+  applyTop();
+  document.getElementById('offset').textContent = 'x: ' + Math.round(offX) + 'px　y: ' + Math.round(offY) + 'px';
+}
+
+function fitView() {
+  if (!baseRaw) return;
+  const pad = 20;
+  const d = Math.min((viewport.clientWidth - pad) / baseRaw.w, (viewport.clientHeight - pad) / baseRaw.h);
+  disp = Math.min(1, d);
+  applyLayout();
+}
+
+document.getElementById('baseInput').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try {
+    const { img, url } = await loadImage(f);
+    if (baseImg.src) URL.revokeObjectURL(baseImg.src);
+    baseImg.src = url;
+    baseRaw = { w: img.naturalWidth, h: img.naturalHeight };
+    stage.appendChild(baseImg);
+    info.textContent = '底圖 ' + baseRaw.w + 'x' + baseRaw.h;
+    fitView();
+    if (topRaw) document.getElementById('exportBtn').disabled = false;
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+document.getElementById('topInput').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try {
+    const { img, url } = await loadImage(f);
+    if (topImg.src) URL.revokeObjectURL(topImg.src);
+    topImg.src = url;
+    topRaw = { w: img.naturalWidth, h: img.naturalHeight };
+    topImg.style.opacity = opacSlider.value / 100;
+    stage.appendChild(topImg);
+    applyLayout();
+    info.textContent = '上層圖 ' + topRaw.w + 'x' + topRaw.h;
+    document.getElementById('exportBtn').disabled = false;
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+opacSlider.addEventListener('input', () => {
+  document.getElementById('opacVal').textContent = opacSlider.value + '%';
+  topImg.style.opacity = opacSlider.value / 100;
+});
+
+scaleSlider.addEventListener('input', () => {
+  scaleTop = scaleSlider.value / 100;
+  document.getElementById('scaleVal').textContent = scaleSlider.value + '%';
+  applyTop();
+});
+
+sxSlider.addEventListener('input', () => {
+  sx = sxSlider.value / 100;
+  document.getElementById('sxVal').textContent = sxSlider.value + '%';
+  applyTop();
+});
+
+sySlider.addEventListener('input', () => {
+  sy = sySlider.value / 100;
+  document.getElementById('syVal').textContent = sySlider.value + '%';
+  applyTop();
+});
+
+kxSlider.addEventListener('input', () => {
+  const deg = Number(kxSlider.value);
+  kx = Math.tan(deg * Math.PI / 180);
+  document.getElementById('kxVal').textContent = deg + '°';
+  applyTop();
+});
+
+kySlider.addEventListener('input', () => {
+  const deg = Number(kySlider.value);
+  ky = Math.tan(deg * Math.PI / 180);
+  document.getElementById('kyVal').textContent = deg + '°';
+  applyTop();
+});
+
+document.getElementById('fitBtn').addEventListener('click', fitView);
+
+document.getElementById('resetOffBtn').addEventListener('click', () => {
+  offX = 0; offY = 0;
+  applyLayout();
+});
+
+document.getElementById('resetDeformBtn').addEventListener('click', () => {
+  scaleSlider.value = 100; scaleTop = 1;
+  sxSlider.value = 100; sx = 1;
+  sySlider.value = 100; sy = 1;
+  kxSlider.value = 0; kx = 0;
+  kySlider.value = 0; ky = 0;
+  document.getElementById('scaleVal').textContent = '100%';
+  document.getElementById('sxVal').textContent = '100%';
+  document.getElementById('syVal').textContent = '100%';
+  document.getElementById('kxVal').textContent = '0°';
+  document.getElementById('kyVal').textContent = '0°';
+  applyTop();
+});
+
+// 拖曳上層圖（移動時半透明對齊，鬆開恢復滑桿透明度看接縫）
+topImg.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;
+  e.preventDefault();
+  drag = { x: e.clientX, y: e.clientY, ox: offX, oy: offY, prevOp: topImg.style.opacity };
+  topImg.style.opacity = 0.4;
+  topImg.classList.add('dragging');
+  topImg.setPointerCapture(e.pointerId);
+});
+
+topImg.addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  offX = drag.ox + (e.clientX - drag.x) / disp;
+  offY = drag.oy + (e.clientY - drag.y) / disp;
+  applyTop();
+});
+
+topImg.addEventListener('pointerup', () => {
+  if (drag) topImg.style.opacity = drag.prevOp || (opacSlider.value / 100);
+  drag = null;
+  topImg.classList.remove('dragging');
+});
+topImg.addEventListener('pointercancel', () => {
+  if (drag) topImg.style.opacity = drag.prevOp || (opacSlider.value / 100);
+  drag = null;
+  topImg.classList.remove('dragging');
+});
+
+// 鍵盤微調
+topImg.tabIndex = 0;
+topImg.addEventListener('keydown', (e) => {
+  const step = e.shiftKey ? 5 : 1;
+  const map = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+  const m = map[e.key];
+  if (!m) return;
+  e.preventDefault();
+  offX += m[0]; offY += m[1];
+  applyTop();
+});
+
+// 滾輪放大檢視
+viewport.addEventListener('wheel', (e) => {
+  if (!baseRaw) return;
+  e.preventDefault();
+  const rect = viewport.getBoundingClientRect();
+  const cx = e.clientX - rect.left + viewport.scrollLeft;
+  const cy = e.clientY - rect.top + viewport.scrollTop;
+  const oldD = disp;
+  disp = Math.max(0.05, Math.min(4, disp * (e.deltaY < 0 ? 1.2 : 1 / 1.2)));
+  viewport.scrollLeft = (cx / oldD) * disp - (e.clientX - rect.left);
+  viewport.scrollTop = (cy / oldD) * disp - (e.clientY - rect.top);
+  applyLayout();
+}, { passive: false });
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  if (!baseRaw || !topRaw) return;
+  const A = baseRaw;
+  const Bw = topRaw.w * scaleTop;
+  const Bh = topRaw.h * scaleTop;
+
+  // 上層四角變形後的位置（原始像素）
+  const corners = [
+    [0, 0], [Bw, 0], [0, Bh], [Bw, Bh]
+  ].map(([cx, cy]) => [
+    sx * cx + kx * cy + offX,
+    ky * cx + sy * cy + offY
+  ]);
+  let minX = 0, minY = 0, maxX = A.w, maxY = A.h;
+  for (const [px, py] of corners) {
+    minX = Math.min(minX, px);
+    minY = Math.min(minY, py);
+    maxX = Math.max(maxX, px);
+    maxY = Math.max(maxY, py);
+  }
+  const outW = Math.ceil(maxX - minX);
+  const outH = Math.ceil(maxY - minY);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = outW;
+  canvas.height = outH;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(baseImg, -minX, -minY, A.w, A.h);
+  ctx.setTransform(sx, ky, kx, sy, offX - minX, offY - minY);
+  ctx.drawImage(topImg, 0, 0, Bw, Bh);
+
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'map-stitched.png';
+  a.click();
+});
+</script>
+</body>
+</html>
