@@ -11,7 +11,7 @@
 
 原版網站：<https://rainchenblue.github.io/threekingdom_map/>
 
-測試的詳細說明請看 **[readme.md](06/readme.md)**。
+測試的詳細說明請看 **[readme.md](https://github.com/QAQRain/_se/blob/main/06/readme.md)**。
 
 ## 功能一覽
 
