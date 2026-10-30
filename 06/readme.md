@@ -2,7 +2,7 @@
 
 本文件專門說明本專案的三層測試：**單元測試（server）**、**系統測試（Web API）**、**E2E 測試（Playwright）**。內容包含測試程式碼位置、測試範圍、案例設計、執行方式與預期結果。
 
-一般安裝與啟動說明請看 [README.md](README.md)。
+一般安裝與啟動說明請看 [README.md](test_project_model_map/README.md)。
 
 ## 1. 對應作業要求
 
@@ -248,6 +248,4 @@ check("檢查名稱", 實際值 === 預期值, 實際值);
 
 - 一鍵跑完三層：雙擊 `test.bat`。
 - 分開跑：`npm run test:unit`、`npm run test:api`、`npm run test:e2e`。
-- 報告用截圖：執行 `test.bat` 後，將終端機的 `[1/3]`、`[2/3]`、`[3/3]` 與 `[PASS]` 畫面截圖。
-- Playwright 產生的 `test-results/`、`playwright-report/` 已被 `.gitignore` 排除，不會進版控。
 - 若資料筆數有變動，請同步更新單元與 API 測試中的預期數量，以及 E2E 的相關斷言。
