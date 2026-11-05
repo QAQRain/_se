@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AniDex 動漫資料站</title>
+<meta name="description" content="動漫資料站：人氣前 500 名動畫，提供搜尋、篩選、比較與分享連結。">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="#/">
+    <span class="brand-mark">A</span>
+    <span class="brand-text">AniDex<small>動漫資料站</small></span>
+  </a>
+  <div class="topbar-search">
+    <input id="search" type="search" placeholder="搜尋作品名稱…" autocomplete="off" aria-label="搜尋作品名稱">
+  </div>
+  <nav class="topbar-nav">
+    <a href="#/">作品列表</a>
+    <a href="#/compare">比較清單</a>
+  </nav>
+</header>
+
+<main id="view" class="view"></main>
+
+<footer class="footer">
+  <p>資料來源：<a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>，僅供課程學習使用。</p>
+  <p id="footer-count" class="muted"></p>
+</footer>
+
+<div id="comparebar" class="comparebar" hidden>
+  <div class="comparebar-info"><strong id="comparebar-count">0</strong> 部待比較</div>
+  <div id="comparebar-list" class="comparebar-list"></div>
+  <div class="comparebar-actions">
+    <a id="comparebar-go" class="btn btn-primary" href="#/compare">開始比較</a>
+    <button id="comparebar-clear" class="btn btn-ghost" type="button">清空</button>
+  </div>
+</div>
+
+<script src="data/titles-zh.js"></script>
+<script src="data/anime-data-1.js"></script>
+<script src="data/anime-data-2.js"></script>
+<script src="data/anime-data-3.js"></script>
+<script src="data/anime-data-4.js"></script>
+<script src="data/anime-data-5.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
