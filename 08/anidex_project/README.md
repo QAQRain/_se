@@ -2,9 +2,10 @@
 
 一個純前端的動漫資料網站，收錄 AniList 人氣前 500 名動畫。可以搜尋、依類型／年份／評分／狀態篩選，把喜歡的作品加入比較清單並排比較，所有篩選條件與比較清單都能用網址分享。
 
+> **線上執行版**：<https://qaqrain.github.io/anidex/>
+
 - 不需要資料庫、不需要後端、不需要安裝任何套件
 - 不需要建置（no build），下載後直接開就能用
-- 可部署到 GitHub Pages
 
 ---
 
@@ -43,7 +44,7 @@
 
 ### 方式 3：線上版
 
-部署到 GitHub Pages 後，直接開啟網址即可（見第七節）。
+直接開啟 <https://qaqrain.github.io/anidex/>，功能與本機版完全相同。
 
 ---
 
@@ -106,60 +107,7 @@ anidex/
 
 ---
 
-## 七、部署到 GitHub Pages（repo 版）
-
-### 1. 建立 repository
-
-到 GitHub 建立一個新的 repository，名稱建議 `anidex`，**不要**勾選「Add a README file」。
-
-### 2. 上傳檔案
-
-用 Git 指令（在 `anidex` 資料夾內執行）：
-
-```bash
-git init
-git add .
-git commit -m "建立 AniDex 動漫資料站"
-git branch -M main
-git remote add origin https://github.com/<你的帳號>/anidex.git
-git push -u origin main
-```
-
-或直接在 GitHub 網頁用「uploading an existing file」把整個資料夾的檔案拖上去。
-
-### 3. 開啟 Pages
-
-repo → **Settings** → 左側 **Pages** →
-
-- Source：`Deploy from a branch`
-- Branch：`main`
-- Folder：`/ (root)`
-
-按 **Save**，等待 1～2 分鐘。
-
-### 4. 完成
-
-網址會是：
-
-```
-https://<你的帳號>.github.io/anidex/
-```
-
----
-
-## 八、放到 `_se/08` 資料夾的版本
-
-同一份程式碼可以直接搬到既有 repo 的子資料夾，**不需要修改任何路徑**，因為所有資源都使用相對路徑。
-
-1. 把 `anidex` 資料夾內的**全部內容**複製到 `_se/08/site/`
-2. 確認 `_se` 的 GitHub Pages 是設在 `main` 分支的 `/ (root)`
-3. 網址會是 `https://<你的帳號>.github.io/_se/08/site/`
-
-> GitHub Pages 只支援以 repo 根目錄或 `/docs` 發佈，不能指定到 `08/site`。因此 `_se` 的 Pages 必須設在根目錄，子資料夾會自動可存取。
-
----
-
-## 九、更新資料（選用）
+## 七、更新資料（選用）
 
 資料已經抓取完成並存放在 `data/` 內，**平常不需要更新**。若日後想重新抓取最新的人氣排行，需要 Node.js 18 以上，並自行執行 AniList GraphQL 查詢後覆蓋 `data/anime-data-*.js`。
 
@@ -167,7 +115,7 @@ https://<你的帳號>.github.io/anidex/
 
 ---
 
-## 十、資料來源與授權
+## 八、資料來源與授權
 
 - 資料來源：[AniList](https://anilist.co)（社群維護的動漫資料庫）
 - 取得方式：AniList GraphQL API，依 `POPULARITY_DESC` 排序取前 500 名，已排除成人內容
@@ -176,7 +124,7 @@ https://<你的帳號>.github.io/anidex/
 
 ---
 
-## 十一、已知限制
+## 九、已知限制
 
 - 作品簡介為 AniList 提供的英文原文，介面其餘部分為繁體中文
 - 中文名稱為人工整理的常見譯名，未收錄的作品會顯示日文原名
