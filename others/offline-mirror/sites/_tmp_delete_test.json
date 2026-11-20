@@ -1,0 +1,22 @@
+{
+  "name": "_tmp_delete_test",
+  "start": "https://example.com/",
+  "hosts": [],
+  "extra_hosts": [],
+  "include": [],
+  "exclude": [],
+  "api_prefixes": [
+    "/api/"
+  ],
+  "max_pages": 3000,
+  "workers": 8,
+  "delay": 0.4,
+  "wait": 2.0,
+  "media": true,
+  "respect_robots": true,
+  "mode": "auto",
+  "port": 8080,
+  "headless": true,
+  "channel": "msedge",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+}

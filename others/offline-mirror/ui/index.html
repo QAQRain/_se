@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>離線網站打包器</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --text: #1b1f24;
+    --muted: #667085;
+    --line: #e2e6ec;
+    --brand: #2563eb;
+    --brand-dark: #1d4ed8;
+    --ok: #15803d;
+    --warn: #b45309;
+    --err: #b91c1c;
+    --log-bg: #0f172a;
+    --log-text: #d6e2f0;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11151b;
+      --card: #1a2029;
+      --text: #e8edf4;
+      --muted: #98a2b3;
+      --line: #2a3340;
+      --brand: #4b8bFF;
+      --brand-dark: #3473e8;
+      --ok: #4ade80;
+      --warn: #fbbf24;
+      --err: #f87171;
+      --log-bg: #0b0f15;
+      --log-text: #c8d5e4;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 20px 60px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  header h1 { margin: 0 0 6px; font-size: 24px; }
+  header p { margin: 0 0 22px; color: var(--muted); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  .card h2 { margin: 0 0 14px; font-size: 17px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+  .grid .full { grid-column: 1 / -1; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  input[type=text], input[type=number] {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+  }
+  input:focus { outline: 2px solid color-mix(in srgb, var(--brand) 45%, transparent); border-color: var(--brand); }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  .check { display: flex; align-items: center; gap: 8px; margin-top: 10px; color: var(--text); font-size: 14px; }
+  .check input { width: 16px; height: 16px; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
+  button.primary {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+    font-weight: 600;
+  }
+  button.primary:hover:not(:disabled) { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
+  button.danger:hover:not(:disabled) { border-color: var(--err); color: var(--err); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  .rec { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .row { display: flex; align-items: center; gap: 10px; justify-content: space-between; flex-wrap: wrap; }
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .badge.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+  .badge.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+  .badge.err { color: var(--err); border-color: color-mix(in srgb, var(--err) 45%, transparent); }
+  .badge.run { color: var(--brand); border-color: color-mix(in srgb, var(--brand) 45%, transparent); }
+  .progress { height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; margin: 12px 0 6px; }
+  .progress > div { height: 100%; width: 0; background: var(--brand); transition: width .3s; }
+  pre.log {
+    margin: 10px 0 0;
+    padding: 12px;
+    background: var(--log-bg);
+    color: var(--log-text);
+    border-radius: 8px;
+    max-height: 320px;
+    overflow: auto;
+    font-size: 12.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-family: "Consolas", "Cascadia Mono", monospace;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-size: 13px; font-weight: 500; }
+  td.name { font-weight: 600; }
+  td .sub { color: var(--muted); font-size: 12.5px; word-break: break-all; }
+  td.ops { white-space: nowrap; text-align: right; }
+  td.ops button { padding: 5px 10px; font-size: 13px; margin-left: 6px; }
+  .empty { color: var(--muted); padding: 14px 0; }
+  .preview-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); }
+  .preview-item .info { flex:1; min-width:0; }
+  .preview-item .path { font-weight:600; font-size:14px; }
+  .preview-item .why { color:var(--warn); font-size:12px; }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%);
+    background: var(--err);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s;
+    max-width: 80vw;
+  }
+  #toast.show { opacity: 1; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>離線網站打包器</h1>
+    <p>輸入網址，抓取整站並打包成本機可瀏覽的離線副本。</p>
+  </header>
+
+  <section class="card">
+    <h2>新任務</h2>
+    <form id="form">
+      <div class="grid">
+        <div class="full">
+          <label for="url">網站網址</label>
+          <input id="url" type="text" placeholder="https://example.com/" required>
+        </div>
+        <div>
+          <label for="name">名稱（留空自動產生）</label>
+          <input id="name" type="text" placeholder="例如 example">
+        </div>
+        <div>
+          <label for="port">離線副本連接埠</label>
+          <input id="port" type="number" min="1024" max="65535" placeholder="8080">
+        </div>
+      </div>
+
+      <details>
+        <summary>進階選項</summary>
+        <div class="grid" style="margin-top:12px">
+          <div>
+            <label for="limit">只抓前 N 頁（測試用）</label>
+            <input id="limit" type="number" min="1" placeholder="全部">
+          </div>
+          <div>
+            <label for="max_pages">頁數上限</label>
+            <input id="max_pages" type="number" min="1" placeholder="3000">
+            <div class="rec">推薦 3000（大型站可調高）</div>
+          </div>
+          <div>
+            <label for="workers">同時開啟分頁數</label>
+            <input id="workers" type="number" min="1" max="16" placeholder="4">
+            <div class="rec">推薦 4–8；8 約可省一半時間，勿超過 16</div>
+          </div>
+          <div>
+            <label for="wait">每頁載入後等待秒數</label>
+            <input id="wait" type="number" min="0" step="0.5" placeholder="2">
+            <div class="rec">推薦 1.0（原廠 2.0，調太低快照可能不全）</div>
+          </div>
+          <div>
+            <label for="delay">探索時每頁延遲秒數</label>
+            <input id="delay" type="number" min="0" step="0.1" placeholder="0.4">
+            <div class="rec">推薦 0.4</div>
+          </div>
+          <div>
+            <label for="include">只抓符合的網址（正則，逗號分隔）</label>
+            <input id="include" type="text" placeholder="例如 /docs/">
+          </div>
+          <div>
+            <label for="exclude">排除的網址（正則，逗號分隔）</label>
+            <input id="exclude" type="text" placeholder="例如 /admin,/user">
+            <div class="rec">可用「預覽抓取範圍」自動找出該排除的路徑</div>
+          </div>
+        </div>
+        <div class="check">
+          <input id="no_media" type="checkbox">
+          <label for="no_media" style="margin:0;color:var(--text)">不下載圖片、影片與字型（體積較小）</label>
+        </div>
+      </details>
+
+      <div class="actions">
+        <button type="submit" class="primary" id="btn-run">開始抓取並打包</button>
+        <button type="button" id="btn-crawl">只抓取</button>
+        <button type="button" id="btn-recommend">填入推薦值</button>
+        <button type="button" id="btn-common-exclude">常見排除規則</button>
+        <button type="button" id="btn-preview">預覽抓取範圍</button>
+        <button type="button" id="btn-save-settings" hidden>儲存設定到既有站台</button>
+        <button type="button" id="btn-cancel-settings" hidden>取消編輯</button>
+      </div>
+      <p class="hint" id="form-hint">名稱與既有站台相同時，會沿用該設定並更新起始網址。</p>
+    </form>
+  </section>
+
+  <section class="card" id="job-card" hidden>
+    <div class="row">
+      <h2 style="margin:0">任務進度</h2>
+      <span class="badge" id="job-badge">準備中</span>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="row">
+      <span class="hint" id="job-meta"></span>
+      <span>
+        <button id="btn-open-site" hidden>開啟離線網站</button>
+        <button id="btn-hide">收起</button>
+      </span>
+    </div>
+    <pre class="log" id="log"></pre>
+  </section>
+
+  <section class="card" id="preview-card" hidden>
+    <div class="row">
+      <h2 style="margin:0">抓取範圍預覽</h2>
+      <button id="btn-hide-preview">收起</button>
+    </div>
+    <p class="hint" id="preview-summary"></p>
+    <div id="preview-suspicious"></div>
+    <p class="hint">點「加入排除」會把路徑放進上方 exclude 欄位；不懂架構也能照建議操作。</p>
+  </section>
+
+  <section class="card">
+    <h2>站台清單</h2>
+    <table>
+      <thead>
+        <tr><th>名稱</th><th>狀態</th><th style="text-align:right">操作</th></tr>
+      </thead>
+      <tbody id="sites"></tbody>
+    </table>
+    <p class="empty" id="sites-empty">還沒有任何站台，先在上面輸入網址開始吧。</p>
+  </section>
+
+  <footer>
+    抓取與打包都在本機執行；關閉這個程式的視窗，介面與它啟動的離線站會一起停止。
+  </footer>
+</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const form = $("form");
+  const logBox = $("log");
+  const jobCard = $("job-card");
+  const jobBadge = $("job-badge");
+  const jobMeta = $("job-meta");
+  const bar = $("bar");
+  const openSiteBtn = $("btn-open-site");
+
+  let currentJob = null;
+  let since = 0;
+  let finishedName = "";
+  let busy = false;
+  let editingName = "";
+
+  function toast(message) {
+    const el = $("toast");
+    el.textContent = message;
+    el.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.remove("show"), 4000);
+  }
+
+  function escapeHtml(text) {
+    return String(text == null ? "" : text).replace(/[&<>"']/g, (ch) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[ch]));
+  }
+
+  async function api(method, url, body) {
+    const options = { method, headers: {} };
+    if (body !== undefined) {
+      options.headers["Content-Type"] = "application/json";
+      options.body = JSON.stringify(body);
+    }
+    const resp = await fetch(url, options);
+    let data = {};
+    try { data = await resp.json(); } catch (e) { data = {}; }
+    if (!resp.ok) throw new Error(data.error || ("請求失敗：" + resp.status));
+    return data;
+  }
+
+  function numeric(id) {
+    const value = $(id).value.trim();
+    if (value === "") return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function formPayload(action) {
+    return {
+      action,
+      url: $("url").value.trim(),
+      name: $("name").value.trim(),
+      options: {
+        limit: numeric("limit"),
+        max_pages: numeric("max_pages"),
+        workers: numeric("workers"),
+        delay: numeric("delay"),
+        wait: numeric("wait"),
+        port: numeric("port"),
+        no_media: $("no_media").checked,
+        include: $("include").value.trim(),
+        exclude: $("exclude").value.trim()
+      }
+    };
+  }
+
+  function fillForm(settings) {
+    $("url").value = settings.url || "";
+    $("name").value = settings.name || "";
+    $("port").value = settings.port == null ? "" : String(settings.port);
+    $("max_pages").value = settings.max_pages == null ? "" : String(settings.max_pages);
+    $("workers").value = settings.workers == null ? "" : String(settings.workers);
+    $("delay").value = settings.delay == null ? "" : String(settings.delay);
+    $("wait").value = settings.wait == null ? "" : String(settings.wait);
+    $("no_media").checked = !settings.media;
+    $("include").value = (settings.include || []).join(", ");
+    $("exclude").value = (settings.exclude || []).join(", ");
+    $("limit").value = "";
+  }
+
+  function setEditing(name) {
+    editingName = name || "";
+    $("btn-save-settings").hidden = !editingName;
+    $("btn-cancel-settings").hidden = !editingName;
+    $("form-hint").textContent = editingName
+      ? "正在編輯既有站台「" + editingName + "」的抓取設定；儲存後按「更新」即以新設定抓取。"
+      : "名稱與既有站台相同時，會沿用該設定並更新起始網址。";
+  }
+
+  async function loadSettings(name) {
+    if (busy) { toast("已有任務在執行中"); return; }
+    try {
+      const data = await api("GET", "/api/settings?name=" + encodeURIComponent(name));
+      fillForm(data);
+      setEditing(name);
+      toast("已載入「" + name + "」的抓取設定");
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
+  async function saveSettings() {
+    if (!editingName) { toast("請先從站台清單選擇「設定」"); return; }
+    const payload = formPayload("update");
+    delete payload.options.limit;
+    try {
+      await api("POST", "/api/settings", { name: editingName, options: payload.options });
+      toast("已儲存「" + editingName + "」的抓取設定");
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
+  function setBusy(value) {
+    busy = value;
+    $("btn-run").disabled = value;
+    $("btn-crawl").disabled = value;
+  }
+
+  async function launch(payload) {
+    if (busy) { toast("已有任務在執行中"); return; }
+    try {
+      const result = await api("POST", "/api/start", payload);
+      finishedName = result.name || "";
+      currentJob = null;
+      since = 0;
+      logBox.textContent = "";
+      bar.style.width = "0";
+      openSiteBtn.hidden = true;
+      jobCard.hidden = false;
+      jobBadge.textContent = "已排入";
+      jobBadge.className = "badge";
+      setBusy(true);
+      setTimeout(refresh, 300);
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
+  async function updateJobCard(job) {
+    jobBadge.textContent = {
+      running: "執行中", done: "完成", error: "失敗"
+    }[job.status] || job.status;
+    jobBadge.className = "badge " + (job.status === "running" ? "warn"
+      : job.status === "done" ? "ok" : "err");
+    jobMeta.textContent = "站台：" + job.name + (job.started ? "　開始 " + job.started : "")
+      + (job.ended ? "　結束 " + job.ended : "");
+
+    const lines = logBox.textContent.split("\n");
+    let progress = null;
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const m = lines[i].match(/\[crawl\]\s+(\d+)\/(\d+)/);
+      if (m) { progress = [Number(m[1]), Number(m[2])]; break; }
+    }
+    if (progress && progress[1] > 0) {
+      bar.style.width = Math.min(100, Math.round(progress[0] / progress[1] * 100)) + "%";
+    } else if (job.status === "running") {
+      bar.style.width = "25%";
+    } else if (job.status === "done") {
+      bar.style.width = "100%";
+    }
+
+    if (job.status !== "running") {
+      setBusy(false);
+      openSiteBtn.hidden = !["run", "build", "update"].includes(job.action) || job.status !== "done";
+      openSiteBtn.textContent = "開啟 " + job.name;
+    }
+  }
+
+  async function pullJob(job) {
+    if (!currentJob || currentJob.id !== job.id) {
+      currentJob = job;
+      since = 0;
+      logBox.textContent = "";
+    }
+    const data = await api("GET", "/api/job?since=" + since);
+    if (data.lines && data.lines.length) {
+      logBox.textContent += data.lines.join("\n") + "\n";
+      since = data.next || since + data.lines.length;
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+    currentJob = data;
+    await updateJobCard(data);
+  }
+
+  function renderSites(sites) {
+    const body = $("sites");
+    $("sites-empty").hidden = sites.length > 0;
+    body.innerHTML = sites.map((site) => {
+      const running = site.running_url
+        ? '<span class="badge run">執行中 :' + escapeHtml(site.port) + "</span>"
+        : (site.built ? '<span class="badge ok">已建置</span>' : '<span class="badge warn">未建置</span>');
+      const detail = site.built
+        ? escapeHtml(site.served_pages) + " 頁、" + escapeHtml(site.api) + " 筆資料、" + escapeHtml(site.size_mb) + " MB"
+        : (site.cache_lines ? "已快取 " + escapeHtml(site.cache_lines) + " 筆，尚未打包" : "尚未抓取");
+      const openBtn = site.built
+        ? '<button data-act="open" data-name="' + escapeHtml(site.name) + '">開啟</button>'
+        : "";
+      const stopBtn = site.running_url
+        ? '<button data-act="stop" data-name="' + escapeHtml(site.name) + '">停止</button>'
+        : "";
+      const updateBtn = site.built || site.cache_lines
+        ? '<button data-act="update" data-name="' + escapeHtml(site.name) + '">更新</button>'
+        : "";
+      const settingsBtn = '<button data-act="settings" data-name="' + escapeHtml(site.name) + '">設定</button>';
+      const deleteBtn = '<button data-act="delete" data-name="' + escapeHtml(site.name) + '">刪除</button>';
+      const buildBtn = site.cache_lines
+        ? '<button data-act="build" data-name="' + escapeHtml(site.name) + '">重建</button>'
+        : "";
+      const fillBtn = site.cache_lines
+        ? '<button data-act="fill-images" data-name="' + escapeHtml(site.name) + '">補圖</button>'
+        : "";
+      return '<tr>'
+        + '<td class="name">' + escapeHtml(site.name)
+        + '<div class="sub">' + escapeHtml(site.url) + "</div></td>"
+        + '<td>' + running + '<div class="sub">' + detail + "</div></td>"
+        + '<td class="ops">' + openBtn + stopBtn + updateBtn + buildBtn + fillBtn + settingsBtn + deleteBtn + "</td>"
+        + "</tr>";
+    }).join("");
+  }
+
+  async function refresh() {
+    let nextDelay = 2000;
+    try {
+      const state = await api("GET", "/api/state");
+      renderSites(state.sites);
+      if (state.job) {
+        jobCard.hidden = false;
+        await pullJob(state.job);
+        if (state.job.status === "running") { nextDelay = 800; setBusy(true); }
+        else { setBusy(false); }
+      } else if (busy) {
+        setBusy(false);
+      }
+    } catch (err) {
+      nextDelay = 4000;
+    }
+    setTimeout(refresh, nextDelay);
+  }
+
+  async function siteAction(action, name) {
+    if (action === "settings") {
+      await loadSettings(name);
+      return;
+    }
+    if (action === "delete") {
+      if (!window.confirm("確定刪除站台「" + name + "」的設定？\n快取與輸出資料夾會保留，日後可重新打包。")) return;
+      try {
+        await api("POST", "/api/delete", { name });
+        if (editingName === name) { setEditing(""); form.reset(); }
+        toast("已刪除站台「" + name + "」的設定");
+        await refresh();
+      } catch (err) {
+        toast(err.message);
+      }
+      return;
+    }
+    if (action === "stop") {
+      try { await api("POST", "/api/stop", { name }); } catch (err) { toast(err.message); }
+      return;
+    }
+    if (action === "open") {
+      const win = window.open("", "_blank");
+      try {
+        const result = await api("POST", "/api/serve", { name });
+        if (win) win.location = result.url; else window.location.href = result.url;
+      } catch (err) {
+        if (win) win.close();
+        toast(err.message);
+      }
+      return;
+    }
+    await launch({ action, name });
+  }
+
+  $("sites").addEventListener("click", (event) => {
+    const btn = event.target.closest("button[data-act]");
+    if (!btn) return;
+    siteAction(btn.dataset.act, btn.dataset.name);
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!$("url").value.trim()) { toast("請先輸入網址"); return; }
+    launch(formPayload("run"));
+  });
+
+  $("btn-crawl").addEventListener("click", () => {
+    if (!$("url").value.trim()) { toast("請先輸入網址"); return; }
+    launch(formPayload("crawl"));
+  });
+
+  $("btn-recommend").addEventListener("click", () => {
+    $("max_pages").value = "3000";
+    $("workers").value = "8";
+    $("wait").value = "1.0";
+    $("delay").value = "0.4";
+    toast("已填入推薦值：workers 8、wait 1.0、delay 0.4、max_pages 3000");
+  });
+
+  const COMMON_EXCLUDES = "/admin,/dashboard,/login,/logout,/register,/signup,/profile,/account,/settings,/password,/reset,/verify,/draft,/edit,/cart,/checkout,/payment,/private,/member";
+
+  $("btn-common-exclude").addEventListener("click", () => {
+    const box = $("exclude");
+    const current = box.value.split(",").map((v) => v.trim()).filter(Boolean);
+    const extra = COMMON_EXCLUDES.split(",").filter((v) => !current.includes(v));
+    box.value = (current.concat(extra)).join(",");
+    toast("已加入 " + extra.length + " 條常見排除規則");
+  });
+
+  async function runPreview() {
+    if (busy) { toast("已有任務在執行中"); return; }
+    if (!$("url").value.trim()) { toast("請先輸入網址"); return; }
+    const btn = $("btn-preview");
+    btn.disabled = true;
+    btn.textContent = "分析中…";
+    try {
+      const data = await api("POST", "/api/preview", formPayload("preview"));
+      const methodText = data.method === "sitemap" ? "网站地图" : "首頁連結探索";
+      $("preview-summary").textContent = "探索方式：" + methodText + "　預計抓取 " + data.total + " 頁。";
+      const box = $("preview-suspicious");
+      if (!data.suspicious.length) {
+        box.innerHTML = '<p class="hint">沒有發現明顯需要排除的路徑。若仍看到不該抓的頁面，可手動加入 exclude。</p>';
+      } else {
+        box.innerHTML = data.suspicious.map((s) =>
+          '<div class="preview-item"><div class="info">'
+          + '<div class="path">' + escapeHtml(s.path) + "（約 " + escapeHtml(s.count) + " 頁）</div>"
+          + '<div class="why">可能是不該抓的：' + escapeHtml(s.reasons.join("、")) + "</div></div>"
+          + '<button type="button" data-exclude="' + escapeHtml(s.path) + '">加入排除</button></div>'
+        ).join("");
+      }
+      $("preview-card").hidden = false;
+      $("preview-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } catch (err) {
+      toast(err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "預覽抓取範圍";
+    }
+  }
+
+  $("btn-preview").addEventListener("click", runPreview);
+
+  $("preview-suspicious").addEventListener("click", (event) => {
+    const btn = event.target.closest("button[data-exclude]");
+    if (!btn) return;
+    const value = btn.dataset.exclude;
+    const box = $("exclude");
+    const current = box.value.split(",").map((v) => v.trim()).filter(Boolean);
+    if (!current.includes(value)) current.push(value);
+    box.value = current.join(",");
+    toast("已加入排除：" + value);
+  });
+
+  $("btn-hide-preview").addEventListener("click", () => { $("preview-card").hidden = true; });
+
+  $("btn-save-settings").addEventListener("click", saveSettings);
+
+  $("btn-cancel-settings").addEventListener("click", () => {
+    setEditing("");
+    form.reset();
+    toast("已取消編輯");
+  });
+
+  openSiteBtn.addEventListener("click", () => {
+    if (finishedName) siteAction("open", finishedName);
+  });
+
+  $("btn-hide").addEventListener("click", () => { jobCard.hidden = true; });
+
+  refresh();
+})();
+</script>
+</body>
+</html>

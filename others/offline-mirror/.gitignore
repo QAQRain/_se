@@ -1,0 +1,11 @@
+# 抓取下來的原始快取與打包產物，不進版本控制
+.cache/
+out/
+screenshots/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# 本機筆記
+TODO.md

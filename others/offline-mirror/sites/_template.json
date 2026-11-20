@@ -1,0 +1,19 @@
+{
+  "name": "_template",
+  "start": "https://example.com/",
+  "hosts": ["example.com"],
+  "extra_hosts": [],
+  "include": [],
+  "exclude": [],
+  "api_prefixes": ["/api/"],
+  "max_pages": 3000,
+  "workers": 4,
+  "delay": 0.4,
+  "wait": 2.0,
+  "media": true,
+  "respect_robots": true,
+  "mode": "auto",
+  "port": 8080,
+  "headless": true,
+  "channel": "msedge"
+}
