@@ -82,6 +82,8 @@ Docker 補充：在 `docker compose up` 的前景畫面按 `Ctrl+C` 只是中斷
 - 靜默模式（`-s`）與連線逾時設定（`-t`）
 - 連線失敗時印出錯誤訊息並回傳非零結束碼，方便在指令稿中判斷
 
+**介紹文件**：[mycurl README](https://github.com/QAQRain/_se/blob/main/01/curl_project/README.md)
+
 ### 2. SAS 校務行政系統
 
 以「國立海嶼大學」為情境的校務行政系統，後端為 Flask + SQLite，前端為單一深色 SPA（原生 JavaScript + Chart.js）。
@@ -95,6 +97,8 @@ Docker 補充：在 `docker compose up` 的前景畫面按 `Ctrl+C` 只是中斷
 - **種子資料**：約 224 名學生、57 名教職員、183 門課程、2,016 筆修課紀錄
 - **示範帳號**：`admin/admin123`、`clerk/clerk123`、`teacher/teacher123`、`student/student123`
 
+**介紹文件**：[SAS_project README](https://github.com/QAQRain/_se/blob/main/02/SAS_project/README.md)
+
 ### 3. 三國兵裝據點地圖（靜態版）
 
 《戰意：三國》互動輔助地圖，把遊戲內分散的情報整理成一張可操作的地圖，純靜態網站、無需建置流程。
@@ -107,6 +111,8 @@ Docker 補充：在 `docker compose up` 的前景畫面按 `Ctrl+C` 只是中斷
 - **操作**：滑鼠滾輪縮放、拖曳平移、一鍵回到 100%，手機版自動改為直排
 - **部署**：資料存放於 JSON，搭配 GitHub Actions 自動部署到 GitHub Pages
 
+**介紹文件**：[project_threekingdom_map README](https://github.com/QAQRain/_se/blob/main/03/project_threekingdom_map/README.md)
+
 ### 4. SAS Docker 微服務版
 
 將 SAS 校務行政系統改造成六個容器的微服務架構，僅對外開放 80 埠。
@@ -116,6 +122,8 @@ Docker 補充：在 `docker compose up` 的前景畫面按 `Ctrl+C` 只是中斷
 - **狀態面板**：在 SAS 首頁新增「Docker 微服務系統狀態」區塊，即時顯示各服務的健康檢查與資料庫連線結果
 - **建置重點**：Flask 使用單一 gunicorn worker，避免初始化時多行程同時重建資料庫；Rust 映像採多階段建置以縮小體積
 - **資料持久化**：PostgreSQL 使用 named volume `pgdata`，一般停止指令不會清除資料
+
+**介紹文件**：[SASforDocker_project README](https://github.com/QAQRain/_se/blob/main/05/SASforDocker_project/README.md)、[Docker 學習筆記](https://github.com/QAQRain/_se/blob/main/05/README.md)
 
 ### 5. 三國地圖三層自動化測試
 
@@ -134,6 +142,8 @@ Docker 補充：在 `docker compose up` 的前景畫面按 `Ctrl+C` 只是中斷
 - **前端容錯**：優先呼叫 `/api/*`，若後端不存在則自動退回讀取 `data/*.json`，讓靜態部署版本仍可正常運作
 - **測試設計**：各層使用獨立的資料與環境，不依賴資料庫、不需外網、不修改正式資料，每次執行結果一致
 
+**介紹文件**：[測試說明](https://github.com/QAQRain/_se/blob/main/06/readme.md)、[專案說明](https://github.com/QAQRain/_se/blob/main/06/test_project_model_map/README.md)
+
 ### 6. AniDex 動漫資料站
 
 收錄 AniList 人氣前 500 名動畫的純前端網站，不需要資料庫、後端、建置流程或任何安裝。
@@ -143,6 +153,8 @@ Docker 補充：在 `docker compose up` 的前景畫面按 `Ctrl+C` 只是中斷
 - **比較**：最多加入 4 部作品，以表格並排呈現，評分與人氣最高者以綠色標示
 - **分享**：所有篩選條件寫入網址；每部作品有獨立連結，例如 `index.html#/a/16498`
 - **資料格式**：使用 `window.ANIME_DATA = ...` 的 JavaScript 檔，避開直接開啟本機檔案時瀏覽器對 `fetch` 的限制
+
+**介紹文件**：[anidex_project README](https://github.com/QAQRain/_se/blob/main/08/anidex_project/README.md)
 
 ### 7. AI 工具總覽網站
 
@@ -154,6 +166,8 @@ Docker 補充：在 `docker compose up` 的前景畫面按 `Ctrl+C` 只是中斷
 - **能力標記**：標示看圖、生圖、生影片、語音、寫程式五種能力
 - **其他**：深色模式與手機版介面
 
+**介紹文件**：[09 README](https://github.com/QAQRain/_se/blob/main/09/README.md)
+
 ### 8. `@qaqrain/ai-catalog` npm 套件
 
 將 AI 工具總覽的同一份資料發佈成可重用的套件，並附上一份可直接開啟的靜態網站。
@@ -162,6 +176,8 @@ Docker 補充：在 `docker compose up` 的前景畫面按 `Ctrl+C` 只是中斷
 - **程式介面**：提供 `items`、`byCategory()`、`search()`、`getById()`，並附 TypeScript 型別
 - **多種取用方式**：`npm install @qaqrain/ai-catalog` 匯入，或直接從 jsDelivr CDN 取得 `data.json`
 - **開發流程**：修改 `data.json` 後執行 `npm run build` 重新產生資料檔；`npm run preview` 可在本機預覽網站
+
+**介紹文件**：[10 README](https://github.com/QAQRain/_se/blob/main/10/README.md)
 
 ## 資料來源
 
